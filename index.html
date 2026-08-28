@@ -28,8 +28,7 @@
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   body{margin:0;background:#05070a;font-family:'Inter',sans-serif;}
-  
-  /* Browser-window frame around the whole mockup (dots + fake url bar).
+    /* Browser-window frame around the whole mockup (dots + fake url bar).
      Purely decorative — remove this block if embedding the site for real,
      since a real browser already provides this chrome. */
   .chrome{
@@ -106,20 +105,9 @@
     color:var(--paper); font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
   }
   .icon-btn:hover{border-color:var(--paper);}
-
-  /* Hamburger menu button — hidden on desktop, shown under 900px
-     (see @media rules). Opens .mobile-menu, a slide-in panel. */
-  .hamburger{ display:none; }
-  .mobile-menu{
-    display:none; position:fixed; top:0; right:0; bottom:0; width:min(300px,80vw); background:var(--ink-2);
-    border-left:1px solid var(--line-strong); z-index:60; padding:26px 24px; flex-direction:column; gap:22px;
-    transform:translateX(100%); transition:transform 0.3s ease;
-  }
-  .mobile-menu.open{ transform:translateX(0); }
-  .mobile-menu a{ color:var(--paper); font-size:16px; }
-  .mobile-menu .cta-btn{ margin-top:10px; text-align:center; }
-  .menu-overlay{ display:none; position:fixed; inset:0; background:rgba(5,7,10,0.6); z-index:55; }
-  .menu-overlay.open{ display:block; }
+    /* CV download button — same pill style as the other nav buttons,
+     filled with the accent colour so it stands out as the second CTA. */
+  .cta-btn.cv{ background:var(--signal); color:var(--ink); border-color:var(--signal); }
 
     /* ============================================================
      HOME SECTION — headline, intro, quick stats, tool tags
@@ -171,7 +159,6 @@
   .case-foot{margin-top:auto; padding-top:22px; display:flex; gap:18px; align-items:center; font-size:12px; font-family:'Space Mono',monospace; color:var(--paper-dim); flex-wrap:wrap;}
   .case-foot b{color:var(--paper); font-weight:400;}
   .case-foot a{color:var(--signal);}
-  .case-del{ position:absolute; top:16px; right:16px; background:none; border:1px solid var(--line-strong); color:var(--danger); width:26px;height:26px;border-radius:6px; font-size:14px; line-height:1;}
   .work-manage{ display:flex; justify-content:flex-end; gap:12px; margin-top:20px; }
   .work-manage .cta-btn{ font-size:12px; padding:8px 16px; }
 
@@ -214,8 +201,7 @@
     font-family:'Fraunces',serif; font-size:64px; color:rgba(244,241,233,0.14); font-weight:300;
   }
   .about-body h2{font-family:'Fraunces',serif; font-weight:450; font-size:30px; margin:0 0 22px; max-width:540px; line-height:1.3; min-height:1.3em;}
-
-  /* Blinking cursor used by the typewriter effect on the About heading
+    /* Blinking cursor used by the typewriter effect on the About heading
      (see the typewriter block near the bottom of the script). */
   .type-cursor{ display:inline-block; width:2px; background:var(--signal); margin-left:2px; animation:blink 0.9s steps(1) infinite; }
   @keyframes blink{ 50%{opacity:0;} }
@@ -307,6 +293,20 @@
   .msg-item p{ font-size:13px; color:var(--paper-dim); margin:8px 0; }
   .msg-item a{ font-size:11.5px; color:var(--signal); }
 
+    /* Admin "existing projects / certificates" management rows — the ONLY
+     place a project or certificate can be removed from. Live public
+     cards (.case, .cert-card) never render a remove button. */
+  .admin-row{
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+    border:1px solid var(--line); border-radius:8px; padding:10px 14px; margin-bottom:8px;
+  }
+  .admin-row .info{ font-size:12.5px; }
+  .admin-row .info b{ display:block; font-size:13.5px; font-weight:500; margin-bottom:2px; }
+  .admin-row .remove-btn{
+    background:none; border:1px solid var(--line-strong); color:var(--danger); border-radius:6px;
+    width:28px; height:28px; font-size:14px; line-height:1; flex-shrink:0;
+  }
+
     /* ============================================================
      SCROLL-REVEAL ANIMATIONS
      Elements with class "reveal" start hidden/offset, then animate
@@ -329,13 +329,14 @@
     /* ============================================================
      RESPONSIVE — tablet and below (900px)
      Sidebar rail becomes a horizontal strip, grids drop to fewer
-     columns, hamburger menu replaces the full nav link list.
+     columns. Section links live only in the rail below this width —
+     the top nav's full link list hides, since the rail already
+     covers navigation on smaller screens.
      ============================================================ */
   @media (max-width:900px){
     .chrome{ max-width:100%; border-radius:0; }
     nav{ padding:20px 32px; }
     .navlinks{ display:none; }
-    .hamburger{ display:flex; }
     section{ padding:48px 32px; }
     .layout{ grid-template-columns:1fr; }
     .rail{
@@ -367,7 +368,8 @@
      Further shrinks type sizes and stacks remaining grids to 1 column.
      ============================================================ */
   @media (max-width:560px){
-    nav{ padding:16px 20px; }
+    nav{ padding:16px 20px; flex-wrap:wrap; row-gap:10px; }
+    .nav-right{ flex-wrap:wrap; row-gap:8px; }
     .cta-btn{ font-size:12px; padding:8px 14px; }
     section{ padding:36px 20px; }
     .rail{ padding:12px 20px; flex-wrap:wrap; row-gap:10px; }
@@ -397,7 +399,9 @@
 
   <div class="site">
     <!-- TOP NAV: logo, section links, light/dark toggle, "Start a project"
-         CTA, and the hamburger button (only visible under 900px). -->
+         CTA, and a CV download button. Under 900px the link list hides
+         and the vertical page-index rail (below) becomes the mobile nav
+         instead — there is no hamburger/drawer menu on this site. -->
     <nav>
       <div class="logo">kelechi anyim<span>.</span></div>
       <div class="navlinks">
@@ -411,23 +415,11 @@
       <div class="nav-right">
         <button class="icon-btn" id="themeToggle" type="button" title="Toggle light/dark">◐</button>
         <a href="#contact" class="cta-btn">Start a project ↗</a>
-        <button class="icon-btn hamburger" id="hamburgerBtn" type="button" title="Menu">≡</button>
+        <!-- CV download: point href at your real CV file (PDF) once you
+             have one hosted — currently a placeholder link. -->
+        <a href="#" class="cta-btn cv" id="cvBtn" download="Anyim-Kelechi-CV.pdf">Download CV ↓</a>
       </div>
     </nav>
-
-    <div class="menu-overlay" id="menuOverlay"></div>
-    <!-- MOBILE NAV DRAWER: slide-in panel opened by the hamburger button.
-         Duplicates the nav links for small screens; JS in the "hamburger
-         menu" script block below controls opening/closing it. -->
-    <div class="mobile-menu" id="mobileMenu">
-      <a href="#home">Home</a>
-      <a href="#work">Work</a>
-      <a href="#certificates">Certificates</a>
-      <a href="#journal">Journal</a>
-      <a href="#about">About</a>
-      <a href="#contact">Contact</a>
-      <a href="#contact" class="cta-btn">Start a project ↗</a>
-    </div>
 
     <div class="layout">
       <!-- PAGE-INDEX RAIL: the vertical "01 Home / 02 Work / ..." sidebar.
@@ -447,6 +439,7 @@
       </div>
 
       <div class="content">
+
         <!-- HERO / HOME: headline, contact snippet, intro line, the two
              main call-to-action buttons, quick stats, and the "tools and
              areas" tag strip. All text here is static — edit it directly
@@ -458,7 +451,7 @@
             <div class="hero-meta">
               Bamenda, Cameroon<br>
               Available for freelance and team work<br>
-              anyim.kelechi@example.com — replace with your email
+              anyimkelechi09@gmail.com
             </div>
           </div>
           <p class="hero-sub">Computer engineering student (BTech, Information and Communication Technology — Computer Science and Networks) with five years of hands-on work across web development, Python, data analysis, and applied AI.</p>
@@ -586,7 +579,7 @@
                 <span>WhatsApp — chat directly</span><span>↗</span>
               </a>
               <a class="contact-btn" id="emailBtn" href="#">
-                <span>Email — anyim.kelechi@example.com</span><span>↗</span>
+                <span>Email — anyimkelechi09@gmail.com</span><span>↗</span>
               </a>
               <button class="contact-btn copy" id="copyEmailBtn" type="button">
                 <span>Copy email address</span><span id="copyState">Copy</span>
@@ -680,7 +673,9 @@
           <div class="field"><label for="pLink">Project link (optional)</label><input id="pLink" type="text" placeholder="https://..."></div>
           <p class="error-text" id="projectError">Add at least a title and description first.</p>
           <button class="cta-btn primary" id="projectSubmit" type="button" style="background:var(--signal);border-color:var(--signal);color:var(--ink);">Add project</button>
-          <p class="sub" style="margin-top:18px;">To remove a project, open Work on the live site while signed in — each card gets a remove button.</p>
+          <h3 style="margin-top:26px;">Existing projects</h3>
+          <p class="sub">Remove a project here — the live Work section never shows a remove button to visitors.</p>
+          <div id="adminProjectList"></div>
         </div>
 
         <div class="admin-pane" data-pane="certs">
@@ -696,6 +691,9 @@
           </div>
           <p class="error-text" id="certError">Add at least a title.</p>
           <button class="cta-btn primary" id="certSubmit" type="button" style="background:var(--signal);border-color:var(--signal);color:var(--ink);">Add certificate</button>
+          <h3 style="margin-top:26px;">Existing certificates</h3>
+          <p class="sub">Remove a certificate here — the live Certificates section never shows a remove button to visitors.</p>
+          <div id="adminCertList"></div>
         </div>
 
         <div class="admin-pane" data-pane="appearance">
@@ -893,7 +891,10 @@
   var projects = loadProjects();
 
     /* Rebuilds the Work section's project cards from the `projects` array.
-     Called after every add/remove, and once on page load. */
+     Called after every add/remove, and once on page load. This is the
+     PUBLIC-FACING render — it never includes a remove button, even for
+     an admin who is logged in. Removing a project can only be done from
+     the admin panel's "Existing projects" list (see renderAdminProjectList). */
   function renderProjects(){
     var host = document.getElementById("workScroll");
     var grid = document.createElement("div");
@@ -902,9 +903,7 @@
       var card = document.createElement("div");
       card.className = "case reveal";
       var linkHtml = p.link ? '<a href="'+escapeHtml(p.link)+'" target="_blank" rel="noopener">View ↗</a>' : "";
-      var delHtml = isAdmin ? '<button class="case-del" data-i="'+i+'" title="Remove project" type="button">x</button>' : "";
       card.innerHTML =
-        delHtml +
         '<div class="case-top"><span class="case-no">Case '+String(i+1).padStart(2,"0")+'</span><span class="case-tag">'+escapeHtml(p.tag)+'</span></div>' +
         '<h3>'+escapeHtml(p.title)+'</h3>' +
         '<p>'+escapeHtml(p.desc)+'</p>' +
@@ -913,15 +912,33 @@
     });
     host.innerHTML = "";
     host.appendChild(grid);
-    host.querySelectorAll(".case-del").forEach(function(btn){
+    observeReveals();
+  }
+
+    /* ADMIN-ONLY project list, with remove buttons. Rendered inside the
+     admin dashboard's Projects tab, never on the public Work section. */
+  function renderAdminProjectList(){
+    var host = document.getElementById("adminProjectList");
+    if(!host) return;
+    host.innerHTML = "";
+    if(!projects.length){ host.innerHTML = '<p class="sub">No projects yet.</p>'; return; }
+    projects.forEach(function(p, i){
+      var row = document.createElement("div");
+      row.className = "admin-row";
+      row.innerHTML =
+        '<div class="info"><b>'+escapeHtml(p.title)+'</b>'+escapeHtml(p.tag)+' · '+escapeHtml(p.year)+'</div>' +
+        '<button class="remove-btn" data-i="'+i+'" title="Remove project" type="button">x</button>';
+      host.appendChild(row);
+    });
+    host.querySelectorAll(".remove-btn").forEach(function(btn){
       btn.addEventListener("click", function(){
         var i = parseInt(btn.getAttribute("data-i"), 10);
         projects.splice(i,1);
         saveProjects(projects);
         renderProjects();
+        renderAdminProjectList();
       });
     });
-    observeReveals();
   }
 
   /* ---------- certificates ---------- */
@@ -941,6 +958,9 @@
   function saveCerts(list){ localStorage.setItem(CERT_KEY, JSON.stringify(list)); }
   var certs = loadCerts();
 
+    /* PUBLIC-FACING render — same rule as projects: never shows a remove
+     button, regardless of admin status. Removal lives only in the admin
+     panel's "Existing certificates" list (renderAdminCertList). */
   function renderCerts(){
     var host = document.getElementById("certGrid");
     host.innerHTML = "";
@@ -949,24 +969,41 @@
       card.className = "cert-card reveal";
       var badgeClass = c.status === "progress" ? "progress" : "done";
       var badgeLabel = c.status === "progress" ? "In progress" : "Completed";
-      var delHtml = isAdmin ? '<button class="case-del" data-i="'+i+'" title="Remove certificate" type="button">x</button>' : "";
       card.innerHTML =
-        delHtml +
         '<span class="cert-badge '+badgeClass+'">'+badgeLabel+'</span>' +
         '<h4>'+escapeHtml(c.title)+'</h4>' +
         '<p>'+escapeHtml(c.desc)+'</p>' +
         '<a href="'+escapeHtml(c.link || "#")+'" target="_blank" rel="noopener">View ↗</a>';
       host.appendChild(card);
     });
-    host.querySelectorAll(".case-del").forEach(function(btn){
+    observeReveals();
+  }
+
+    /* ADMIN-ONLY certificate list, with remove buttons. Rendered inside
+     the admin dashboard's Certificates tab, never on the public page. */
+  function renderAdminCertList(){
+    var host = document.getElementById("adminCertList");
+    if(!host) return;
+    host.innerHTML = "";
+    if(!certs.length){ host.innerHTML = '<p class="sub">No certificates yet.</p>'; return; }
+    certs.forEach(function(c, i){
+      var row = document.createElement("div");
+      row.className = "admin-row";
+      var badgeLabel = c.status === "progress" ? "In progress" : "Completed";
+      row.innerHTML =
+        '<div class="info"><b>'+escapeHtml(c.title)+'</b>'+badgeLabel+'</div>' +
+        '<button class="remove-btn" data-i="'+i+'" title="Remove certificate" type="button">x</button>';
+      host.appendChild(row);
+    });
+    host.querySelectorAll(".remove-btn").forEach(function(btn){
       btn.addEventListener("click", function(){
         var i = parseInt(btn.getAttribute("data-i"), 10);
         certs.splice(i,1);
         saveCerts(certs);
         renderCerts();
+        renderAdminCertList();
       });
     });
-    observeReveals();
   }
 
   /* ---------- profile (photo + bio) ---------- */
@@ -1050,7 +1087,7 @@
     });
   }
 
-  var EMAIL_ADDRESS = "anyim.kelechi@example.com";
+  var EMAIL_ADDRESS = "anyimkelechi09@gmail.com";
     /* Validates the quick-message form, saves a copy locally, then opens
      the visitor's email app with the message pre-filled as the actual
      delivery method (this is not live chat). */
@@ -1083,6 +1120,8 @@
   function openAdmin(){
     renderProjects();
     renderCerts();
+    renderAdminProjectList();
+    renderAdminCertList();
     applyProfile();
     renderSwatches();
     renderAnimOptions();
@@ -1154,6 +1193,7 @@
     saveProjects(projects);
     ["pTitle","pTag","pDesc","pRole","pYear","pLink"].forEach(function(id){ document.getElementById(id).value=""; });
     renderProjects();
+    renderAdminProjectList();
   });
 
     /* "Add certificate" button in the admin panel: same pattern as
@@ -1172,14 +1212,16 @@
     saveCerts(certs);
     ["cTitle","cDesc","cLink"].forEach(function(id){ document.getElementById(id).value=""; });
     renderCerts();
+    renderAdminCertList();
   });
 
   /* ---------- contact buttons ---------- */
     /* ============================================================
      CONTACT BUTTONS — WhatsApp link, mailto link, copy-to-clipboard
-     Replace WHATSAPP_NUMBER and EMAIL_ADDRESS with your real details.
+     wa.me needs the number in international format with no "+", spaces,
+     or leading zeros — update WHATSAPP_NUMBER here if the number changes.
      ============================================================ */
-  var WHATSAPP_NUMBER = "237600000000";
+  var WHATSAPP_NUMBER = "237677655706";
   document.getElementById("whatsappBtn").href = "https://wa.me/"+WHATSAPP_NUMBER;
   document.getElementById("emailBtn").href = "mailto:"+EMAIL_ADDRESS;
   document.getElementById("copyEmailBtn").addEventListener("click", function(){
@@ -1189,20 +1231,6 @@
       setTimeout(function(){ stateEl.textContent = "Copy"; }, 1800);
     });
   });
-
-  /* ---------- hamburger menu ---------- */
-    /* ============================================================
-     HAMBURGER MENU (mobile navigation)
-     Slides .mobile-menu in from the right and dims the page behind it.
-     ============================================================ */
-  var mobileMenu = document.getElementById("mobileMenu");
-  var menuOverlay = document.getElementById("menuOverlay");
-  function closeMenu(){ mobileMenu.classList.remove("open"); menuOverlay.classList.remove("open"); }
-  document.getElementById("hamburgerBtn").addEventListener("click", function(){
-    mobileMenu.classList.add("open"); menuOverlay.classList.add("open");
-  });
-  menuOverlay.addEventListener("click", closeMenu);
-  mobileMenu.querySelectorAll("a").forEach(function(a){ a.addEventListener("click", closeMenu); });
 
   /* ---------- nav scroll spy ---------- */
     /* ============================================================
