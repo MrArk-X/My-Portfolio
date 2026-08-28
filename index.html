@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Anyim Kelechi Lonpah Urai — Portfolio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,450;9..144,600&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    /* ============================================================
+     THEME VARIABLES
+     Every color on the site is a CSS variable, not a hardcoded value.
+     The Appearance tab in the admin panel changes these live by
+     rewriting them with JavaScript (see applyTheme() in the script).
+     ============================================================ */
+  :root{
+    --ink:#12161c;
+    --ink-2:#181d25;
+    --paper:#f4f1e9;
+    --paper-dim:#c9c4b4;
+    --line: rgba(244,241,233,0.14);
+    --line-strong: rgba(244,241,233,0.28);
+    --signal:#c98a3e;
+    --signal-dim: rgba(201,138,62,0.16);
+    --moss:#7c8f6c;
+    --danger:#c96a4e;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:#05070a;font-family:'Inter',sans-serif;}
+  
+  /* Browser-window frame around the whole mockup (dots + fake url bar).
+     Purely decorative — remove this block if embedding the site for real,
+     since a real browser already provides this chrome. */
+  .chrome{
+    max-width:1180px;margin:0 auto;background:#0b0d11;border-radius:14px;
+    overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,0.55);border:1px solid #1c2128;
+  }
+  .chrome-bar{
+    display:flex;align-items:center;gap:20px;padding:14px 20px;background:#0e1116;
+    border-bottom:1px solid #1c2128;
+  }
+  .dots{display:flex;gap:7px;}
+  .dot{width:11px;height:11px;border-radius:50%;background:#2a2f38;}
+  .url{
+    flex:1;background:#161a20;border:1px solid #232833;border-radius:7px;
+    padding:7px 14px;color:#7d8494;font-size:12.5px;font-family:'Space Mono',monospace;
+    display:flex;align-items:center;gap:8px;
+  }
+  .url:before{content:"";width:6px;height:6px;border-radius:50%;background:#7c8f6c;}
+
+    /* Main site background + text color, tied to the theme variables above. */
+  .site{ background:var(--ink); color:var(--paper); position:relative; transition:background 0.3s, color 0.3s;}
+  .layout{ display:grid; grid-template-columns:64px 1fr; }
+  a{text-decoration:none;cursor:pointer;}
+  button{font-family:inherit;cursor:pointer;}
+  [class*="var(--ink"]{transition:background 0.3s, color 0.3s, border-color 0.3s;}
+
+    /* ---- Page-index sidebar ----
+     Desktop: vertical strip of section shortcuts down the left edge.
+     Tablet/mobile: flips into a horizontal strip (see @media rules below). */
+  .rail{
+    background:var(--ink-2); border-right:1px solid var(--line);
+    display:flex; flex-direction:column; align-items:center; padding:28px 0; gap:34px;
+    position:sticky; top:0; align-self:start; height:100%;
+  }
+  .rail-mark{ font-family:'Fraunces',serif; font-size:19px; color:var(--signal); }
+  .rail-index{ display:flex; flex-direction:column; gap:22px; margin-top:8px;}
+  .rail-item{
+    writing-mode:vertical-rl; text-orientation:mixed; font-family:'Space Mono',monospace;
+    font-size:11px; letter-spacing:0.08em; color:var(--paper-dim); display:flex; align-items:center; gap:8px;
+    padding:2px 0; background:none; border:none;
+  }
+  .rail-item b{color:var(--signal); font-weight:700;}
+  .rail-item.current{color:var(--paper);}
+  .rail-item.current:before{ content:""; width:4px; height:4px; border-radius:50%; background:var(--signal); }
+
+  .content{padding:0;}
+  section{padding:64px 68px; border-bottom:1px solid var(--line);}
+  .eyebrow{
+    font-family:'Space Mono',monospace; font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--signal); margin:0 0 14px;
+  }
+
+    /* ---- Top navigation bar ----
+     position:sticky + top:0 keeps it pinned to the top of the viewport
+     while the page scrolls, so the nav is always reachable. */
+  nav{
+    display:flex; align-items:center; justify-content:space-between; padding:24px 68px;
+    border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--ink); z-index:40;
+    gap:20px;
+  }
+  .logo{font-family:'Fraunces',serif; font-size:19px; letter-spacing:0.01em; color:var(--paper);}
+  .logo span{color:var(--signal);}
+  .navlinks{display:flex; gap:34px; font-size:13.5px; color:var(--paper-dim); align-items:center;}
+  .navlinks a{color:inherit;}
+  .navlinks a:hover, .navlinks a.active{color:var(--paper);}
+  .nav-right{display:flex; align-items:center; gap:14px;}
+  .cta-btn{
+    font-size:13px; font-family:'Space Mono',monospace; border:1px solid var(--line-strong);
+    padding:9px 18px; border-radius:100px; color:var(--paper); background:none; display:inline-block;
+  }
+  .cta-btn:hover{border-color:var(--paper);}
+  .icon-btn{
+    width:36px; height:36px; border-radius:100px; border:1px solid var(--line-strong); background:none;
+    color:var(--paper); font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .icon-btn:hover{border-color:var(--paper);}
+
+  /* Hamburger menu button — hidden on desktop, shown under 900px
+     (see @media rules). Opens .mobile-menu, a slide-in panel. */
+  .hamburger{ display:none; }
+  .mobile-menu{
+    display:none; position:fixed; top:0; right:0; bottom:0; width:min(300px,80vw); background:var(--ink-2);
+    border-left:1px solid var(--line-strong); z-index:60; padding:26px 24px; flex-direction:column; gap:22px;
+    transform:translateX(100%); transition:transform 0.3s ease;
+  }
+  .mobile-menu.open{ transform:translateX(0); }
+  .mobile-menu a{ color:var(--paper); font-size:16px; }
+  .mobile-menu .cta-btn{ margin-top:10px; text-align:center; }
+  .menu-overlay{ display:none; position:fixed; inset:0; background:rgba(5,7,10,0.6); z-index:55; }
+  .menu-overlay.open{ display:block; }
+
+    /* ============================================================
+     HOME SECTION — headline, intro, quick stats, tool tags
+     ============================================================ */
+  .hero{padding-top:88px; padding-bottom:80px;}
+  .hero-top{display:flex; justify-content:space-between; align-items:flex-start; gap:40px;}
+  .hero h1{
+    font-family:'Fraunces',serif; font-weight:450; font-size:56px; line-height:1.08; margin:0;
+    max-width:760px; letter-spacing:-0.01em;
+  }
+  .hero h1 em{font-style:italic; color:var(--signal); font-weight:300;}
+  .hero-meta{
+    font-family:'Space Mono',monospace; font-size:12px; color:var(--paper-dim); text-align:right;
+    line-height:1.9; white-space:nowrap; padding-top:10px;
+  }
+  .hero-sub{
+    margin:30px 0 0; max-width:560px; font-size:16.5px; line-height:1.7; color:var(--paper-dim);
+  }
+  .hero-ctas{ display:flex; gap:14px; margin-top:32px; }
+  .hero-ctas .cta-btn.primary{ background:var(--signal); color:var(--ink); border-color:var(--signal); }
+  .hero-stats{display:flex; gap:56px; margin-top:56px; flex-wrap:wrap;}
+  .stat b{display:block; font-family:'Fraunces',serif; font-size:30px; font-weight:450; color:var(--paper);}
+  .stat span{font-size:12.5px; color:var(--paper-dim);}
+  .hero-strip{
+    margin-top:60px; display:flex; align-items:center; gap:18px; padding-top:26px; border-top:1px solid var(--line); flex-wrap:wrap;
+  }
+  .hero-strip span.label{font-size:12px; color:var(--paper-dim); font-family:'Space Mono',monospace;}
+  .logos{display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
+  .logos span{font-family:'Space Mono',monospace; font-size:12px; padding:6px 12px; border:1px solid var(--line-strong); border-radius:100px; color:var(--paper-dim);}
+
+    /* ============================================================
+     WORK SECTION — scrollable project grid + "Admin panel" button
+     Project cards are rendered by renderProjects() in the script,
+     reading from localStorage so admin-added projects persist.
+     ============================================================ */
+  .work-head{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:36px; gap:20px;}
+  .work-head h2{font-family:'Fraunces',serif; font-weight:450; font-size:34px; margin:0;}
+  .work-head p{font-size:13px; color:var(--paper-dim); max-width:300px; text-align:right; margin:0;}
+  .work-scroll{ max-height:640px; overflow-y:auto; padding-right:8px; margin-right:-8px; }
+  .work-scroll::-webkit-scrollbar{width:6px;}
+  .work-scroll::-webkit-scrollbar-thumb{background:var(--line-strong); border-radius:4px;}
+  .work-grid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line);}
+  .case{background:var(--ink); padding:34px; display:flex; flex-direction:column; min-height:240px; position:relative;}
+  .case-top{display:flex; justify-content:space-between; align-items:flex-start;}
+  .case-no{font-family:'Space Mono',monospace; font-size:12px; color:var(--paper-dim);}
+  .case-tag{font-family:'Space Mono',monospace; font-size:11px; padding:4px 10px; border-radius:100px; background:var(--signal-dim); color:var(--signal);}
+  .case h3{font-family:'Fraunces',serif; font-weight:450; font-size:23px; margin:20px 0 10px;}
+  .case p{font-size:13.5px; color:var(--paper-dim); line-height:1.6; margin:0; max-width:380px;}
+  .case-foot{margin-top:auto; padding-top:22px; display:flex; gap:18px; align-items:center; font-size:12px; font-family:'Space Mono',monospace; color:var(--paper-dim); flex-wrap:wrap;}
+  .case-foot b{color:var(--paper); font-weight:400;}
+  .case-foot a{color:var(--signal);}
+  .case-del{ position:absolute; top:16px; right:16px; background:none; border:1px solid var(--line-strong); color:var(--danger); width:26px;height:26px;border-radius:6px; font-size:14px; line-height:1;}
+  .work-manage{ display:flex; justify-content:flex-end; gap:12px; margin-top:20px; }
+  .work-manage .cta-btn{ font-size:12px; padding:8px 16px; }
+
+    /* ============================================================
+     CERTIFICATES SECTION — rendered by renderCerts() in the script
+     ============================================================ */
+  .cert-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  .cert-card{background:var(--ink-2); border:1px solid var(--line); border-radius:10px; padding:24px; position:relative;}
+  .cert-badge{display:inline-block; font-family:'Space Mono',monospace; font-size:10.5px; padding:3px 10px; border-radius:100px; margin-bottom:14px;}
+  .cert-badge.done{background:var(--signal-dim); color:var(--signal);}
+  .cert-badge.progress{background:rgba(124,143,108,0.16); color:var(--moss);}
+  .cert-card h4{font-family:'Fraunces',serif; font-weight:450; font-size:17px; margin:0 0 6px;}
+  .cert-card p{font-size:12.5px; color:var(--paper-dim); margin:0 0 16px; line-height:1.5;}
+  .cert-card a{font-size:12px; font-family:'Space Mono',monospace; color:var(--paper);}
+  .cert-manage, .journal-manage{ display:flex; justify-content:flex-end; margin-top:20px; }
+
+    /* ============================================================
+     JOURNAL SECTION — static blog/write-up cards (not yet
+     admin-editable; edit the HTML directly to change these)
+     ============================================================ */
+  .journal-grid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line);}
+  .post{background:var(--ink); padding:30px; display:flex; flex-direction:column;}
+  .post-date{font-family:'Space Mono',monospace; font-size:11.5px; color:var(--paper-dim); margin-bottom:14px;}
+  .post h4{font-family:'Fraunces',serif; font-weight:450; font-size:20px; margin:0 0 10px;}
+  .post p{font-size:13.5px; line-height:1.6; color:var(--paper-dim); margin:0 0 16px;}
+  .post a{font-size:12px; font-family:'Space Mono',monospace; color:var(--signal); margin-top:auto;}
+
+    /* ============================================================
+     ABOUT SECTION — profile photo, bio text, skills tags.
+     Photo + bio are rendered by applyProfile() in the script.
+     ============================================================ */
+  .about-grid{display:grid; grid-template-columns:340px 1fr; gap:64px;}
+  .avatar{
+    width:100%; aspect-ratio:4/5; border-radius:10px; border:1px solid var(--line);
+    background:linear-gradient(155deg,#242b34,#171b21); position:relative; overflow:hidden;
+  }
+  .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .avatar .initials{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-size:64px; color:rgba(244,241,233,0.14); font-weight:300;
+  }
+  .about-body h2{font-family:'Fraunces',serif; font-weight:450; font-size:30px; margin:0 0 22px; max-width:540px; line-height:1.3; min-height:1.3em;}
+
+  /* Blinking cursor used by the typewriter effect on the About heading
+     (see the typewriter block near the bottom of the script). */
+  .type-cursor{ display:inline-block; width:2px; background:var(--signal); margin-left:2px; animation:blink 0.9s steps(1) infinite; }
+  @keyframes blink{ 50%{opacity:0;} }
+  .about-body p{font-size:15.5px; line-height:1.8; color:var(--paper-dim); max-width:560px; margin:0 0 18px;}
+  .skills{display:flex; flex-wrap:wrap; gap:10px; margin-top:30px;}
+  .skill{font-family:'Space Mono',monospace; font-size:12px; padding:8px 14px; border:1px solid var(--line-strong); border-radius:100px; color:var(--paper);}
+
+    /* ============================================================
+     CONTACT SECTION — WhatsApp/email buttons + "quick message" form
+     ============================================================ */
+  .contact{ display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start;}
+  .contact h2{font-family:'Fraunces',serif; font-weight:450; font-size:40px; margin:0 0 20px; line-height:1.15;}
+  .contact-methods{ display:flex; flex-direction:column; gap:12px; max-width:360px; }
+  .contact-btn{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:14px 18px; border:1px solid var(--line-strong); border-radius:10px; color:var(--paper); font-size:14px;
+    background:none;
+  }
+  .contact-btn:hover{border-color:var(--signal); color:var(--signal);}
+  .contact-btn .copy{ font-family:'Space Mono',monospace; font-size:11px; color:var(--paper-dim); background:none; border:none; }
+  .quick-msg{ margin-top:26px; max-width:360px; }
+  .quick-msg .note{ font-size:11.5px; color:var(--paper-dim); margin:10px 0 0; line-height:1.6; }
+  footer{
+    padding:22px 68px; display:flex; justify-content:space-between; font-family:'Space Mono',monospace;
+    font-size:11.5px; color:var(--paper-dim); border-top:none;
+  }
+
+    /* ============================================================
+     MODAL / OVERLAY STYLES
+     Shared styling for the admin login popup and the admin dashboard
+     popup. .modal-overlay is the dimmed background; .modal is the
+     white/dark card in the middle. */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(5,7,10,0.7); display:none; align-items:center; justify-content:center;
+    z-index:100; padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--ink-2); border:1px solid var(--line-strong); border-radius:12px; padding:30px;
+    width:100%; max-width:420px; max-height:88vh; overflow-y:auto;
+  }
+  .modal.wide{ max-width:720px; }
+  .modal h3{font-family:'Fraunces',serif; font-weight:450; font-size:20px; margin:0 0 6px; color:var(--paper);}
+  .modal .sub{font-size:12.5px; color:var(--paper-dim); margin:0 0 22px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:11.5px; font-family:'Space Mono',monospace; color:var(--paper-dim); margin-bottom:6px;}
+  .field input, .field textarea{
+    width:100%; background:var(--ink); border:1px solid var(--line-strong); border-radius:7px; color:var(--paper);
+    padding:10px 12px; font-family:'Inter',sans-serif; font-size:13.5px;
+  }
+  .field textarea{resize:vertical; min-height:70px;}
+  .modal-actions{display:flex; gap:10px; margin-top:20px;}
+  .modal-actions .cta-btn{flex:1; text-align:center;}
+  .modal-close{ position:absolute; top:16px; right:16px; }
+  .modal-wrap{position:relative;}
+  .error-text{font-size:12px; color:var(--danger); margin:-6px 0 12px; display:none;}
+  .error-text.show{display:block;}
+  .admin-tag{font-size:11px; font-family:'Space Mono',monospace; color:var(--moss); margin-bottom:14px; display:block;}
+
+    /* ---- Admin dashboard layout ----
+     Left column: tab buttons (Profile / Projects / Certificates /
+     Appearance / Messages). Right column: the active tab's content. */
+  .admin-layout{ display:grid; grid-template-columns:140px 1fr; gap:24px; }
+  .admin-tabs{ display:flex; flex-direction:column; gap:4px; }
+  .admin-tab{ text-align:left; background:none; border:none; color:var(--paper-dim); font-size:13px; padding:9px 10px; border-radius:7px; }
+  .admin-tab.active{ background:var(--ink); color:var(--paper); }
+  .admin-pane{ display:none; }
+  .admin-pane.active{ display:block; }
+  .avatar-preview{ width:80px; height:80px; border-radius:10px; overflow:hidden; border:1px solid var(--line-strong); margin-bottom:12px; background:var(--ink); display:flex; align-items:center; justify-content:center;}
+  .avatar-preview img{ width:100%; height:100%; object-fit:cover; }
+
+    /* Appearance tab: grid of the 10 color-preset swatches. */
+  .swatch-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:22px; }
+  .swatch{
+    border-radius:8px; overflow:hidden; border:2px solid transparent; cursor:pointer; height:52px; position:relative;
+  }
+  .swatch.active{ border-color:var(--signal); }
+  .swatch b{ position:absolute; bottom:3px; left:5px; font-size:9px; font-family:'Space Mono',monospace; }
+
+    /* Appearance tab: grid of the 5 card-animation-style buttons. */
+  .anim-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .anim-opt{ padding:12px; border:1px solid var(--line-strong); border-radius:8px; text-align:left; background:none; color:var(--paper); font-size:12.5px; }
+  .anim-opt.active{ border-color:var(--signal); color:var(--signal); }
+
+    /* Admin "Messages" tab: one card per quick-message submission. */
+  .msg-item{ border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:10px; }
+  .msg-item .who{ font-size:13px; font-weight:500; }
+  .msg-item .when{ font-size:11px; color:var(--paper-dim); font-family:'Space Mono',monospace; }
+  .msg-item p{ font-size:13px; color:var(--paper-dim); margin:8px 0; }
+  .msg-item a{ font-size:11.5px; color:var(--signal); }
+
+    /* ============================================================
+     SCROLL-REVEAL ANIMATIONS
+     Elements with class "reveal" start hidden/offset, then animate
+     in once JavaScript's IntersectionObserver sees them enter the
+     viewport (see revealObserver in the script). Which animation
+     style is active is controlled by a class on <body> — e.g.
+     body.anim-fadeup — set from the Appearance tab.
+     ============================================================ */
+  .reveal{ opacity:0; }
+  body.anim-fadeup .reveal{ transform:translateY(28px); transition:opacity 0.6s ease, transform 0.6s ease; }
+  body.anim-fadeup .reveal.is-visible{ opacity:1; transform:none; }
+  body.anim-slide .reveal{ transform:translateX(-32px); transition:opacity 0.6s ease, transform 0.6s ease; }
+  body.anim-slide .reveal.is-visible{ opacity:1; transform:none; }
+  body.anim-zoom .reveal{ transform:scale(0.92); transition:opacity 0.5s ease, transform 0.5s ease; }
+  body.anim-zoom .reveal.is-visible{ opacity:1; transform:none; }
+  body.anim-flip .reveal{ transform:rotateX(18deg) translateY(14px); transform-origin:top center; transition:opacity 0.6s ease, transform 0.6s ease; }
+  body.anim-flip .reveal.is-visible{ opacity:1; transform:none; }
+  body.anim-none .reveal{ opacity:1; transform:none; transition:none; }
+
+    /* ============================================================
+     RESPONSIVE — tablet and below (900px)
+     Sidebar rail becomes a horizontal strip, grids drop to fewer
+     columns, hamburger menu replaces the full nav link list.
+     ============================================================ */
+  @media (max-width:900px){
+    .chrome{ max-width:100%; border-radius:0; }
+    nav{ padding:20px 32px; }
+    .navlinks{ display:none; }
+    .hamburger{ display:flex; }
+    section{ padding:48px 32px; }
+    .layout{ grid-template-columns:1fr; }
+    .rail{
+      position:static; flex-direction:row; justify-content:space-between; align-items:center;
+      padding:14px 32px; height:auto; gap:0;
+    }
+    .rail-index{ flex-direction:row; margin-top:0; gap:20px; }
+    .rail-item{ writing-mode:horizontal-tb; font-size:10.5px; }
+    .hero{ padding-top:52px; padding-bottom:52px; }
+    .hero-top{ flex-direction:column; gap:22px; }
+    .hero h1{ font-size:40px; max-width:100%; }
+    .hero-meta{ text-align:left; }
+    .hero-stats{ gap:36px; }
+    .work-grid{ grid-template-columns:1fr; }
+    .journal-grid{ grid-template-columns:1fr; }
+    .work-head{ flex-direction:column; align-items:flex-start; gap:10px; }
+    .work-head p{ text-align:left; }
+    .cert-grid{ grid-template-columns:1fr 1fr; }
+    .about-grid{ grid-template-columns:220px 1fr; gap:32px; }
+    .about-body h2{ font-size:24px; }
+    .contact{ grid-template-columns:1fr; gap:28px; }
+    .contact h2{ font-size:30px; }
+    footer{ padding:20px 32px; flex-direction:column; gap:6px; }
+    .admin-layout{ grid-template-columns:1fr; }
+    .admin-tabs{ flex-direction:row; flex-wrap:wrap; }
+  }
+    /* ============================================================
+     RESPONSIVE — phone-sized screens (560px)
+     Further shrinks type sizes and stacks remaining grids to 1 column.
+     ============================================================ */
+  @media (max-width:560px){
+    nav{ padding:16px 20px; }
+    .cta-btn{ font-size:12px; padding:8px 14px; }
+    section{ padding:36px 20px; }
+    .rail{ padding:12px 20px; flex-wrap:wrap; row-gap:10px; }
+    .rail-index{ flex-wrap:wrap; gap:14px; }
+    .hero h1{ font-size:30px; }
+    .hero-sub{ font-size:15px; }
+    .hero-stats{ gap:24px; margin-top:40px; }
+    .stat b{ font-size:24px; }
+    .work-head h2{ font-size:26px; }
+    .case{ padding:22px; min-height:auto; }
+    .case h3{ font-size:19px; }
+    .cert-grid{ grid-template-columns:1fr; }
+    .about-grid{ grid-template-columns:1fr; }
+    .avatar{ max-width:180px; aspect-ratio:1/1; }
+    .about-body h2{ font-size:21px; }
+    .contact h2{ font-size:25px; }
+    .swatch-grid{ grid-template-columns:repeat(3,1fr); }
+  }
+</style>
+</head>
+<body class="anim-fadeup">
+<div class="chrome">
+  <div class="chrome-bar">
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div class="url">mrark-x.dev</div>
+  </div>
+
+  <div class="site">
+    <!-- TOP NAV: logo, section links, light/dark toggle, "Start a project"
+         CTA, and the hamburger button (only visible under 900px). -->
+    <nav>
+      <div class="logo">kelechi anyim<span>.</span></div>
+      <div class="navlinks">
+        <a href="#home" class="active">Home</a>
+        <a href="#work">Work</a>
+        <a href="#certificates">Certificates</a>
+        <a href="#journal">Journal</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="nav-right">
+        <button class="icon-btn" id="themeToggle" type="button" title="Toggle light/dark">◐</button>
+        <a href="#contact" class="cta-btn">Start a project ↗</a>
+        <button class="icon-btn hamburger" id="hamburgerBtn" type="button" title="Menu">≡</button>
+      </div>
+    </nav>
+
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <!-- MOBILE NAV DRAWER: slide-in panel opened by the hamburger button.
+         Duplicates the nav links for small screens; JS in the "hamburger
+         menu" script block below controls opening/closing it. -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#home">Home</a>
+      <a href="#work">Work</a>
+      <a href="#certificates">Certificates</a>
+      <a href="#journal">Journal</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+      <a href="#contact" class="cta-btn">Start a project ↗</a>
+    </div>
+
+    <div class="layout">
+      <!-- PAGE-INDEX RAIL: the vertical "01 Home / 02 Work / ..." sidebar.
+           Purely navigational — same destinations as the top nav links.
+           The "current" class (highlighted item) is kept in sync with
+           scroll position by the "nav scroll spy" script near the bottom. -->
+      <div class="rail">
+        <div class="rail-mark">*</div>
+        <div class="rail-index">
+          <a href="#home" class="rail-item current"><b>01</b> Home</a>
+          <a href="#work" class="rail-item"><b>02</b> Work</a>
+          <a href="#certificates" class="rail-item"><b>03</b> Certificates</a>
+          <a href="#journal" class="rail-item"><b>04</b> Journal</a>
+          <a href="#about" class="rail-item"><b>05</b> About</a>
+          <a href="#contact" class="rail-item"><b>06</b> Contact</a>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- HERO / HOME: headline, contact snippet, intro line, the two
+             main call-to-action buttons, quick stats, and the "tools and
+             areas" tag strip. All text here is static — edit it directly
+             in this HTML, or move it into the admin Profile tab later
+             the same way the About bio was (see README, "Not accomplished"). -->
+        <section class="hero" id="home">
+          <div class="hero-top">
+            <h1>I build web platforms, data tools, and <em>AI-powered products.</em></h1>
+            <div class="hero-meta">
+              Bamenda, Cameroon<br>
+              Available for freelance and team work<br>
+              anyim.kelechi@example.com — replace with your email
+            </div>
+          </div>
+          <p class="hero-sub">Computer engineering student (BTech, Information and Communication Technology — Computer Science and Networks) with five years of hands-on work across web development, Python, data analysis, and applied AI.</p>
+
+          <div class="hero-ctas">
+            <a href="#contact" class="cta-btn primary">Start a project ↗</a>
+            <a href="#work" class="cta-btn">See my work</a>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat reveal"><b>5+</b><span>Years in web development</span></div>
+            <div class="stat reveal"><b>2</b><span>Years working with Python</span></div>
+            <div class="stat reveal"><b>4</b><span>Disciplines — web, Python, data, AI</span></div>
+          </div>
+
+          <div class="hero-strip">
+            <span class="label">Tools and areas</span>
+            <div class="logos">
+              <span>Web development</span><span>Python</span><span>Data analysis</span><span>AI / Claude</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- WORK / PROJECTS: header text is static; the project cards
+             themselves are rendered entirely by JavaScript (renderProjects())
+             into the empty #workScroll div below, reading from the
+             `projects` array which is loaded from localStorage. The
+             "Admin panel" button opens the login modal, then the
+             dashboard, where projects get added or removed. -->
+        <section class="work" id="work">
+          <div class="work-head">
+            <h2>Selected work</h2>
+            <p>Projects from freelance and team work. Scroll for more — new work gets added here regularly.</p>
+          </div>
+          <div class="work-scroll" id="workScroll"></div>
+          <div class="work-manage">
+            <button class="cta-btn" id="manageBtn" type="button">Admin panel</button>
+          </div>
+        </section>
+
+        <!-- CERTIFICATES: same pattern as Work — cards are rendered by
+             renderCerts() into #certGrid from the `certs` array
+             (localStorage-backed), editable from the admin Certificates tab. -->
+        <section class="certificates" id="certificates">
+          <div class="eyebrow">Certificates</div>
+          <div class="cert-grid" id="certGrid"></div>
+        </section>
+
+        <!-- JOURNAL / BLOG: currently static placeholder posts written
+             directly in this HTML — there's no admin tab for these yet
+             (see README, "Not accomplished"). Replace the text below with
+             real posts, or add a "Read post" link once posts have pages. -->
+        <section class="journal" id="journal">
+          <div class="work-head">
+            <h2>Journal</h2>
+            <p>Short write-ups on what I'm building and learning — web, Python, data, and AI.</p>
+          </div>
+          <div class="journal-grid">
+            <div class="post reveal">
+              <span class="post-date">Coming soon</span>
+              <h4>What five years of freelance web work taught me about scope</h4>
+              <p>A short post on this idea — replace this text with your own write-up whenever you're ready to publish it.</p>
+              <a href="#" target="_blank" rel="noopener">Read post ↗</a>
+            </div>
+            <div class="post reveal">
+              <span class="post-date">Coming soon</span>
+              <h4>Starting the AI Engineering track on Udemy</h4>
+              <p>Notes from working through the certificate — what's clicking, what's hard, what I'd tell someone starting out.</p>
+              <a href="#" target="_blank" rel="noopener">Read post ↗</a>
+            </div>
+            <div class="post reveal">
+              <span class="post-date">Coming soon</span>
+              <h4>Moving from web development into data analysis</h4>
+              <p>How the two disciplines actually overlap, and where they don't, from someone doing both.</p>
+              <a href="#" target="_blank" rel="noopener">Read post ↗</a>
+            </div>
+            <div class="post reveal">
+              <span class="post-date">Coming soon</span>
+              <h4>Where Claude fits into my day-to-day work</h4>
+              <p>A practical look at where AI tools actually save time on client projects, and where they don't yet.</p>
+              <a href="#" target="_blank" rel="noopener">Read post ↗</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ABOUT: photo + bio. The photo and both bio paragraphs are
+             editable from the admin Profile tab (applyProfile() fills
+             these elements in from localStorage on load). The heading
+             text itself is typed out on scroll by the typewriter script
+             near the bottom — its source string lives in `fullHeading`. -->
+        <section class="about" id="about">
+          <div class="eyebrow">About</div>
+          <div class="about-grid">
+            <div class="avatar reveal" id="avatarBox"><div class="initials" id="avatarInitials">AK</div></div>
+            <div class="about-body">
+              <h2 id="typewriterTarget"></h2>
+              <p id="bioP1">I'm a computer engineering student from Bamenda, Cameroon, holding a BTech in Information and Communication Technology from the Department of Computer Science and Networks. Over five years I've worked freelance and on teams building for the web, and within that time spent two years deep in Python.</p>
+              <p id="bioP2">More recently I've moved into data analysis and applied AI — including certified work with Anthropic's Claude — and I'm currently completing an AI Engineering certificate with Udemy.</p>
+              <div class="skills">
+                <div class="skill">Web development</div>
+                <div class="skill">Python</div>
+                <div class="skill">Data analysis</div>
+                <div class="skill">Applied AI</div>
+                <div class="skill">Freelance delivery</div>
+                <div class="skill">Team collaboration</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CONTACT: WhatsApp / email buttons (URLs are set by JS further
+             down from the WHATSAPP_NUMBER and EMAIL_ADDRESS constants —
+             update those, not these hrefs), a copy-email button, and the
+             quick-message form. The form saves a local copy (visible in
+             the admin Messages tab on this device) and opens a pre-filled
+             email — see README for why it isn't a real live chat yet. -->
+        <section class="contact" id="contact">
+          <div>
+            <h2>Have a project in mind?<br>Reach out directly.</h2>
+            <p style="color:var(--paper-dim); font-size:14px; max-width:380px; margin:0 0 22px;">Fastest way to reach me is WhatsApp. For anything formal, email works too.</p>
+          </div>
+          <div>
+            <div class="contact-methods">
+              <a class="contact-btn" id="whatsappBtn" href="#" target="_blank" rel="noopener">
+                <span>WhatsApp — chat directly</span><span>↗</span>
+              </a>
+              <a class="contact-btn" id="emailBtn" href="#">
+                <span>Email — anyim.kelechi@example.com</span><span>↗</span>
+              </a>
+              <button class="contact-btn copy" id="copyEmailBtn" type="button">
+                <span>Copy email address</span><span id="copyState">Copy</span>
+              </button>
+            </div>
+            <div class="quick-msg">
+              <div class="field"><label for="mName">Your name</label><input id="mName" type="text" placeholder="Jane Doe"></div>
+              <div class="field"><label for="mFrom">Your email</label><input id="mFrom" type="text" placeholder="you@example.com"></div>
+              <div class="field"><label for="mMsg">Message</label><textarea id="mMsg" placeholder="What are you looking to build?"></textarea></div>
+              <p class="error-text" id="msgError">Add your name, email, and a short message.</p>
+              <button class="cta-btn primary" id="msgSend" type="button" style="background:var(--signal);border-color:var(--signal);color:var(--ink);width:100%;">Send message</button>
+              <p class="note">This opens your email app with the message pre-filled, and also saves a copy to the admin panel on this device. It isn't live chat — for that, replies still come by email or WhatsApp.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- FOOTER: static copyright line and location. -->
+        <footer>
+          <span>© 2026 Anyim Kelechi Lonpah Urai</span>
+          <span>Bamenda, Cameroon</span>
+        </footer>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN MODAL: username/password form. Checked client-side only
+     against ADMIN_USER / ADMIN_PASS in the script below — see README for
+     why this is a convenience lock, not real security. -->
+<div class="modal-overlay" id="loginOverlay">
+  <div class="modal modal-wrap">
+    <button class="cta-btn modal-close" id="loginClose" type="button">Close</button>
+    <h3>Admin login</h3>
+    <p class="sub">Sign in to manage your site.</p>
+    <div class="field">
+      <label for="loginUser">Username</label>
+      <input id="loginUser" type="text" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="loginPass">Password</label>
+      <input id="loginPass" type="password" autocomplete="current-password">
+    </div>
+    <p class="error-text" id="loginError">That username or password isn't right. Try again.</p>
+    <div class="modal-actions">
+      <button class="cta-btn primary" id="loginSubmit" type="button" style="background:var(--signal);border-color:var(--signal);color:var(--ink);">Sign in</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD MODAL: shown after a successful login. Five tabs
+     (Profile / Projects / Certificates / Appearance / Messages), switched
+     by the ".admin-tab" click handler in the script below. Everything
+     inside saves to this browser's localStorage — see README for what
+     that means and what a real backend would change. -->
+<div class="modal-overlay" id="adminOverlay">
+  <div class="modal wide modal-wrap">
+    <button class="cta-btn modal-close" id="adminClose" type="button">Close</button>
+    <span class="admin-tag">Signed in as admin — changes save to this browser</span>
+    <div class="admin-layout">
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="profile" type="button">Profile</button>
+        <button class="admin-tab" data-tab="projects" type="button">Projects</button>
+        <button class="admin-tab" data-tab="certs" type="button">Certificates</button>
+        <button class="admin-tab" data-tab="appearance" type="button">Appearance</button>
+        <button class="admin-tab" data-tab="messages" type="button">Messages</button>
+        <button class="cta-btn" id="logoutBtn" type="button" style="margin-top:10px;">Sign out</button>
+      </div>
+
+      <div class="admin-content">
+
+        <div class="admin-pane active" data-pane="profile">
+          <h3>Profile</h3>
+          <p class="sub">Your photo and bio, shown in the About section.</p>
+          <div class="avatar-preview" id="avatarPreview"><span style="font-size:11px;color:var(--paper-dim)">No photo</span></div>
+          <div class="field"><label for="avatarFile">Upload photo</label><input id="avatarFile" type="file" accept="image/*"></div>
+          <div class="field"><label for="bioName">Initials shown before a photo is uploaded</label><input id="bioName" type="text" placeholder="AK"></div>
+          <div class="field"><label for="bioText1">Bio — paragraph 1</label><textarea id="bioText1"></textarea></div>
+          <div class="field"><label for="bioText2">Bio — paragraph 2</label><textarea id="bioText2"></textarea></div>
+          <button class="cta-btn primary" id="profileSave" type="button" style="background:var(--signal);border-color:var(--signal);color:var(--ink);">Save profile</button>
+        </div>
+
+        <div class="admin-pane" data-pane="projects">
+          <h3>Add a project</h3>
+          <p class="sub">Appears in Work immediately after saving.</p>
+          <div class="field"><label for="pTitle">Title</label><input id="pTitle" type="text" placeholder="e.g. Inventory dashboard for a retail client"></div>
+          <div class="field"><label for="pTag">Category</label><input id="pTag" type="text" placeholder="e.g. Web development"></div>
+          <div class="field"><label for="pDesc">Description</label><textarea id="pDesc" placeholder="What it does and the result it got"></textarea></div>
+          <div class="field"><label for="pRole">Your role</label><input id="pRole" type="text" placeholder="e.g. Freelance developer"></div>
+          <div class="field"><label for="pYear">Year</label><input id="pYear" type="text" placeholder="e.g. 2026"></div>
+          <div class="field"><label for="pLink">Project link (optional)</label><input id="pLink" type="text" placeholder="https://..."></div>
+          <p class="error-text" id="projectError">Add at least a title and description first.</p>
+          <button class="cta-btn primary" id="projectSubmit" type="button" style="background:var(--signal);border-color:var(--signal);color:var(--ink);">Add project</button>
+          <p class="sub" style="margin-top:18px;">To remove a project, open Work on the live site while signed in — each card gets a remove button.</p>
+        </div>
+
+        <div class="admin-pane" data-pane="certs">
+          <h3>Add a certificate</h3>
+          <div class="field"><label for="cTitle">Title</label><input id="cTitle" type="text" placeholder="e.g. Claude AI — Anthropic"></div>
+          <div class="field"><label for="cDesc">Description</label><textarea id="cDesc" placeholder="What it's for"></textarea></div>
+          <div class="field"><label for="cLink">Credential link</label><input id="cLink" type="text" placeholder="https://..."></div>
+          <div class="field"><label for="cStatus">Status</label>
+            <select id="cStatus" style="width:100%;background:var(--ink);border:1px solid var(--line-strong);border-radius:7px;color:var(--paper);padding:10px 12px;">
+              <option value="done">Completed</option>
+              <option value="progress">In progress</option>
+            </select>
+          </div>
+          <p class="error-text" id="certError">Add at least a title.</p>
+          <button class="cta-btn primary" id="certSubmit" type="button" style="background:var(--signal);border-color:var(--signal);color:var(--ink);">Add certificate</button>
+        </div>
+
+        <div class="admin-pane" data-pane="appearance">
+          <h3>Appearance</h3>
+          <p class="sub">Pick a background/text/accent combination. Applies on this device — visitors elsewhere keep the site default until this is connected to a backend.</p>
+          <div class="swatch-grid" id="swatchGrid"></div>
+          <h3>Card animation style</h3>
+          <div class="anim-grid" id="animGrid"></div>
+        </div>
+
+        <div class="admin-pane" data-pane="messages">
+          <h3>Messages</h3>
+          <p class="sub">Only shows messages sent from this same browser — a real shared inbox needs a backend.</p>
+          <div id="msgList"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    /* ============================================================
+     ADMIN CREDENTIALS + LOGIN STATE
+     WARNING: this check runs entirely in the browser, so anyone who
+     views this page's source can read these values. It stops casual
+     visitors from editing the site, but it is NOT real security —
+     see the README for how to do this properly with a backend.
+     ============================================================ */
+  var ADMIN_USER = "MrArk-X";
+  var ADMIN_PASS = "MrArk-X.com";
+  var isAdmin = sessionStorage.getItem("kelechi_admin") === "1";
+
+    /* Turns user-entered text (project titles, bios, messages, etc.) into
+     safe HTML so nothing typed into a form can break the page or run
+     unwanted code when it's displayed back on the site. */
+  function escapeHtml(s){
+    return (s||"").replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  /* ---------- theme presets ---------- */
+    /* ============================================================
+     APPEARANCE — 10 color presets
+     Each entry is one full background/text/accent combination.
+     Picking one in the admin panel calls applyTheme() below, which
+     rewrites the CSS variables from :root{} live.
+     ============================================================ */
+  var THEMES = [
+    { name:"Midnight amber", ink:"#12161c", ink2:"#181d25", paper:"#f4f1e9", paperDim:"#c9c4b4", signal:"#c98a3e" },
+    { name:"Slate and sky",  ink:"#10151d", ink2:"#161c26", paper:"#eef2f7", paperDim:"#9fb0c2", signal:"#4a90d9" },
+    { name:"Charcoal moss",  ink:"#15170f13".slice(0,7), ink2:"#1c1f19", paper:"#eef1e8", paperDim:"#a9b09c", signal:"#7c8f6c" },
+    { name:"Ink and gold",   ink:"#0f0f11", ink2:"#17171a", paper:"#f2ede0", paperDim:"#b8ae98", signal:"#d4a017" },
+    { name:"Forest night",   ink:"#0f1712", ink2:"#16211a", paper:"#eef0e6", paperDim:"#a7b39c", signal:"#e0a339" },
+    { name:"Ivory espresso", ink:"#f7f3ea", ink2:"#efe9da", paper:"#241c15", paperDim:"#6b5d4d", signal:"#8a5a34" },
+    { name:"Arctic",         ink:"#f8f9fb", ink2:"#eef1f5", paper:"#1a1f26", paperDim:"#5c6773", signal:"#2f6fd1" },
+    { name:"Sand and clay",  ink:"#f4ece0", ink2:"#ecdfcb", paper:"#2c2115", paperDim:"#75634a", signal:"#c1652f" },
+    { name:"Paper and rose", ink:"#faf1f0", ink2:"#f2dfdd", paper:"#241417", paperDim:"#7a5a5c", signal:"#b0495b" },
+    { name:"Graphite sage",  ink:"#f0f2ee", ink2:"#e2e6dd", paper:"#22261f", paperDim:"#626b58", signal:"#5f7a52" }
+  ];
+  THEMES[2].ink = "#151713";
+
+  function hexToRgb(hex){
+    hex = hex.replace("#","");
+    var n = parseInt(hex,16);
+    return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+  }
+    /* Applies a theme preset: sets all the CSS color variables at once
+     and remembers the choice in localStorage so it's still applied
+     next time this browser opens the site. */
+  function applyTheme(index){
+    var t = THEMES[index] || THEMES[0];
+    var root = document.documentElement.style;
+    var paperRgb = hexToRgb(t.paper);
+    var signalRgb = hexToRgb(t.signal);
+    root.setProperty("--ink", t.ink);
+    root.setProperty("--ink-2", t.ink2);
+    root.setProperty("--paper", t.paper);
+    root.setProperty("--paper-dim", t.paperDim);
+    root.setProperty("--signal", t.signal);
+    root.setProperty("--line", "rgba("+paperRgb.r+","+paperRgb.g+","+paperRgb.b+",0.14)");
+    root.setProperty("--line-strong", "rgba("+paperRgb.r+","+paperRgb.g+","+paperRgb.b+",0.28)");
+    root.setProperty("--signal-dim", "rgba("+signalRgb.r+","+signalRgb.g+","+signalRgb.b+",0.16)");
+    localStorage.setItem("kelechi_theme_index", String(index));
+  }
+  function renderSwatches(){
+    var host = document.getElementById("swatchGrid");
+    var current = parseInt(localStorage.getItem("kelechi_theme_index") || "0", 10);
+    host.innerHTML = "";
+    THEMES.forEach(function(t, i){
+      var el = document.createElement("div");
+      el.className = "swatch" + (i===current ? " active" : "");
+      el.style.background = t.ink;
+      el.innerHTML = '<b style="color:'+t.paper+'">'+t.name+'</b>';
+      el.addEventListener("click", function(){
+        applyTheme(i);
+        renderSwatches();
+      });
+      host.appendChild(el);
+    });
+  }
+
+  /* quick light/dark toggle: jumps between dark default (0) and light default (5) */
+    /* Quick light/dark button in the navbar — jumps straight between the
+     first dark preset and the first light preset, as a shortcut separate
+     from the full 10-option picker in the admin panel. */
+  document.getElementById("themeToggle").addEventListener("click", function(){
+    var current = parseInt(localStorage.getItem("kelechi_theme_index") || "0", 10);
+    var isLightFamily = current >= 5;
+    applyTheme(isLightFamily ? 0 : 5);
+  });
+
+  /* ---------- card animation style ---------- */
+    /* ============================================================
+     APPEARANCE — card animation styles (5 options)
+     Which one is active is stored as a class on <body>, e.g.
+     body.anim-fadeup — the actual animation rules live in the CSS
+     under "SCROLL-REVEAL ANIMATIONS".
+     ============================================================ */
+  var ANIMS = [
+    { key:"fadeup", label:"Fade up" },
+    { key:"slide",  label:"Slide in" },
+    { key:"zoom",   label:"Zoom in" },
+    { key:"flip",   label:"Tilt in" },
+    { key:"none",   label:"No animation" }
+  ];
+  function applyAnim(key){
+    ANIMS.forEach(function(a){ document.body.classList.remove("anim-"+a.key); });
+    document.body.classList.add("anim-"+key);
+    localStorage.setItem("kelechi_anim", key);
+  }
+  function renderAnimOptions(){
+    var host = document.getElementById("animGrid");
+    var current = localStorage.getItem("kelechi_anim") || "fadeup";
+    host.innerHTML = "";
+    ANIMS.forEach(function(a){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "anim-opt" + (a.key===current ? " active" : "");
+      btn.textContent = a.label;
+      btn.addEventListener("click", function(){
+        applyAnim(a.key);
+        renderAnimOptions();
+      });
+      host.appendChild(btn);
+    });
+  }
+
+  /* ---------- scroll reveal ---------- */
+    /* ============================================================
+     SCROLL-REVEAL ENGINE
+     Watches every element with class "reveal"; when one scrolls into
+     view it gets class "is-visible", which the CSS then animates in.
+     observeReveals() must be re-run after new cards are added (e.g.
+     after renderProjects()) so newly created cards get watched too.
+     ============================================================ */
+  var revealObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add("is-visible");
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold:0.15 });
+  function observeReveals(){
+    document.querySelectorAll(".reveal").forEach(function(el){
+      if(!el.classList.contains("is-visible")) revealObserver.observe(el);
+    });
+  }
+
+  /* ---------- projects ---------- */
+    /* ============================================================
+     PROJECTS DATA (Work section)
+     Stored in localStorage under PROJ_KEY, so it survives page
+     reloads on this device. defaultProjects is only used the very
+     first time the site loads, before anything has been saved.
+     ============================================================ */
+  var PROJ_KEY = "kelechi_portfolio_projects";
+  var defaultProjects = [
+    { title:"Client booking site rebuild", tag:"Web development", role:"Freelance developer", year:"2025",
+      desc:"Rebuilt a small business booking site end to end, cutting page load time and adding mobile support.", link:"" },
+    { title:"Sales data cleanup and reporting", tag:"Data analysis", role:"Freelance analyst", year:"2025",
+      desc:"Cleaned a year of messy spreadsheet sales data and built a repeatable reporting workflow in Python.", link:"" },
+    { title:"Automation scripts for a team workflow", tag:"Python", role:"Team developer", year:"2024",
+      desc:"Wrote Python scripts that replaced a manual weekly reporting task, saving several hours a week.", link:"" },
+    { title:"AI-assisted content workflow", tag:"Applied AI", role:"Freelance developer", year:"2026",
+      desc:"Built a Claude-powered workflow to help a small team draft and review content faster.", link:"" }
+  ];
+  function loadProjects(){
+    try{ var raw = localStorage.getItem(PROJ_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+    return defaultProjects;
+  }
+  function saveProjects(list){ localStorage.setItem(PROJ_KEY, JSON.stringify(list)); }
+  var projects = loadProjects();
+
+    /* Rebuilds the Work section's project cards from the `projects` array.
+     Called after every add/remove, and once on page load. */
+  function renderProjects(){
+    var host = document.getElementById("workScroll");
+    var grid = document.createElement("div");
+    grid.className = "work-grid";
+    projects.forEach(function(p, i){
+      var card = document.createElement("div");
+      card.className = "case reveal";
+      var linkHtml = p.link ? '<a href="'+escapeHtml(p.link)+'" target="_blank" rel="noopener">View ↗</a>' : "";
+      var delHtml = isAdmin ? '<button class="case-del" data-i="'+i+'" title="Remove project" type="button">x</button>' : "";
+      card.innerHTML =
+        delHtml +
+        '<div class="case-top"><span class="case-no">Case '+String(i+1).padStart(2,"0")+'</span><span class="case-tag">'+escapeHtml(p.tag)+'</span></div>' +
+        '<h3>'+escapeHtml(p.title)+'</h3>' +
+        '<p>'+escapeHtml(p.desc)+'</p>' +
+        '<div class="case-foot"><span>Role · <b>'+escapeHtml(p.role)+'</b></span><span>Year · <b>'+escapeHtml(p.year)+'</b></span>'+linkHtml+'</div>';
+      grid.appendChild(card);
+    });
+    host.innerHTML = "";
+    host.appendChild(grid);
+    host.querySelectorAll(".case-del").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var i = parseInt(btn.getAttribute("data-i"), 10);
+        projects.splice(i,1);
+        saveProjects(projects);
+        renderProjects();
+      });
+    });
+    observeReveals();
+  }
+
+  /* ---------- certificates ---------- */
+    /* ============================================================
+     CERTIFICATES DATA — same pattern as projects above
+     ============================================================ */
+  var CERT_KEY = "kelechi_certificates";
+  var defaultCerts = [
+    { title:"Claude AI — Anthropic", desc:"Certificate of completion for AI development with Claude. Replace this link with your credential URL.", link:"", status:"done" },
+    { title:"AI Engineering — Udemy", desc:"Currently working through this program.", link:"", status:"progress" },
+    { title:"BTech, Information and Communication Technology", desc:"Department of Computer Science and Networks. Add the institution name and transcript link here.", link:"", status:"done" }
+  ];
+  function loadCerts(){
+    try{ var raw = localStorage.getItem(CERT_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+    return defaultCerts;
+  }
+  function saveCerts(list){ localStorage.setItem(CERT_KEY, JSON.stringify(list)); }
+  var certs = loadCerts();
+
+  function renderCerts(){
+    var host = document.getElementById("certGrid");
+    host.innerHTML = "";
+    certs.forEach(function(c, i){
+      var card = document.createElement("div");
+      card.className = "cert-card reveal";
+      var badgeClass = c.status === "progress" ? "progress" : "done";
+      var badgeLabel = c.status === "progress" ? "In progress" : "Completed";
+      var delHtml = isAdmin ? '<button class="case-del" data-i="'+i+'" title="Remove certificate" type="button">x</button>' : "";
+      card.innerHTML =
+        delHtml +
+        '<span class="cert-badge '+badgeClass+'">'+badgeLabel+'</span>' +
+        '<h4>'+escapeHtml(c.title)+'</h4>' +
+        '<p>'+escapeHtml(c.desc)+'</p>' +
+        '<a href="'+escapeHtml(c.link || "#")+'" target="_blank" rel="noopener">View ↗</a>';
+      host.appendChild(card);
+    });
+    host.querySelectorAll(".case-del").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var i = parseInt(btn.getAttribute("data-i"), 10);
+        certs.splice(i,1);
+        saveCerts(certs);
+        renderCerts();
+      });
+    });
+    observeReveals();
+  }
+
+  /* ---------- profile (photo + bio) ---------- */
+    /* ============================================================
+     PROFILE DATA — photo, fallback initials, and bio paragraphs
+     ============================================================ */
+  var PROFILE_KEY = "kelechi_profile";
+  function loadProfile(){
+    try{ var raw = localStorage.getItem(PROFILE_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+    return { initials:"AK", photo:"", bio1: document.getElementById("bioP1").textContent, bio2: document.getElementById("bioP2").textContent };
+  }
+  function saveProfile(p){ localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); }
+  function applyProfile(){
+    var p = loadProfile();
+    document.getElementById("bioP1").textContent = p.bio1;
+    document.getElementById("bioP2").textContent = p.bio2;
+    var box = document.getElementById("avatarBox");
+    if(p.photo){
+      box.innerHTML = '<img src="'+p.photo+'" alt="Profile photo">';
+    } else {
+      box.innerHTML = '<div class="initials">'+escapeHtml(p.initials || "AK")+'</div>';
+    }
+    document.getElementById("bioName").value = p.initials || "AK";
+    document.getElementById("bioText1").value = p.bio1;
+    document.getElementById("bioText2").value = p.bio2;
+    var preview = document.getElementById("avatarPreview");
+    preview.innerHTML = p.photo ? '<img src="'+p.photo+'" alt="">' : '<span style="font-size:11px;color:var(--paper-dim)">No photo</span>';
+  }
+
+    /* Handles the photo upload in the admin panel: reads the chosen file
+     and converts it to a base64 data string (FileReader), which is what
+     gets saved to localStorage and used as the <img> source. */
+  document.getElementById("avatarFile").addEventListener("change", function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      var p = loadProfile();
+      p.photo = ev.target.result;
+      saveProfile(p);
+      applyProfile();
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById("profileSave").addEventListener("click", function(){
+    var p = loadProfile();
+    p.initials = document.getElementById("bioName").value.trim() || "AK";
+    p.bio1 = document.getElementById("bioText1").value.trim();
+    p.bio2 = document.getElementById("bioText2").value.trim();
+    saveProfile(p);
+    applyProfile();
+  });
+
+  /* ---------- messages ---------- */
+    /* ============================================================
+     QUICK-MESSAGE INBOX
+     Messages submitted through the Contact form are saved here so
+     they show up in the admin panel's Messages tab. This only
+     captures messages sent from THIS browser — see the README for
+     why a real shared inbox needs a backend.
+     ============================================================ */
+  var MSG_KEY = "kelechi_messages";
+  function loadMessages(){
+    try{ var raw = localStorage.getItem(MSG_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+    return [];
+  }
+  function saveMessages(list){ localStorage.setItem(MSG_KEY, JSON.stringify(list)); }
+  function renderMessages(){
+    var host = document.getElementById("msgList");
+    var msgs = loadMessages();
+    if(!msgs.length){ host.innerHTML = '<p class="sub">No messages yet.</p>'; return; }
+    host.innerHTML = "";
+    msgs.slice().reverse().forEach(function(m){
+      var el = document.createElement("div");
+      el.className = "msg-item";
+      el.innerHTML =
+        '<div class="who">'+escapeHtml(m.name)+' &middot; <span class="when">'+escapeHtml(m.when)+'</span></div>' +
+        '<p>'+escapeHtml(m.message)+'</p>' +
+        '<a href="mailto:'+escapeHtml(m.from)+'">Reply by email ↗</a>';
+      host.appendChild(el);
+    });
+  }
+
+  var EMAIL_ADDRESS = "anyim.kelechi@example.com";
+    /* Validates the quick-message form, saves a copy locally, then opens
+     the visitor's email app with the message pre-filled as the actual
+     delivery method (this is not live chat). */
+  document.getElementById("msgSend").addEventListener("click", function(){
+    var name = document.getElementById("mName").value.trim();
+    var from = document.getElementById("mFrom").value.trim();
+    var message = document.getElementById("mMsg").value.trim();
+    var err = document.getElementById("msgError");
+    if(!name || !from || !message){ err.classList.add("show"); return; }
+    err.classList.remove("show");
+    var msgs = loadMessages();
+    msgs.push({ name:name, from:from, message:message, when:new Date().toLocaleString() });
+    saveMessages(msgs);
+    var subject = encodeURIComponent("Message from "+name+" via portfolio site");
+    var body = encodeURIComponent(message + "\n\nFrom: " + name + " (" + from + ")");
+    window.location.href = "mailto:"+EMAIL_ADDRESS+"?subject="+subject+"&body="+body;
+    ["mName","mFrom","mMsg"].forEach(function(id){ document.getElementById(id).value=""; });
+  });
+
+  /* ---------- login / admin panel ---------- */
+    /* ============================================================
+     LOGIN + ADMIN DASHBOARD — open/close wiring
+     ============================================================ */
+  var loginOverlay = document.getElementById("loginOverlay");
+  var adminOverlay = document.getElementById("adminOverlay");
+  var loginError = document.getElementById("loginError");
+
+    /* Refreshes every admin tab's contents and opens the dashboard —
+     called right after a successful login. */
+  function openAdmin(){
+    renderProjects();
+    renderCerts();
+    applyProfile();
+    renderSwatches();
+    renderAnimOptions();
+    renderMessages();
+    adminOverlay.classList.add("open");
+  }
+
+  document.getElementById("manageBtn").addEventListener("click", function(){
+    if(isAdmin){ openAdmin(); }
+    else{
+      loginError.classList.remove("show");
+      document.getElementById("loginUser").value = "";
+      document.getElementById("loginPass").value = "";
+      loginOverlay.classList.add("open");
+    }
+  });
+  document.getElementById("loginClose").addEventListener("click", function(){ loginOverlay.classList.remove("open"); });
+  document.getElementById("adminClose").addEventListener("click", function(){ adminOverlay.classList.remove("open"); renderProjects(); renderCerts(); });
+  loginOverlay.addEventListener("click", function(e){ if(e.target===loginOverlay) loginOverlay.classList.remove("open"); });
+  adminOverlay.addEventListener("click", function(e){ if(e.target===adminOverlay){ adminOverlay.classList.remove("open"); renderProjects(); renderCerts(); } });
+
+  document.getElementById("loginSubmit").addEventListener("click", function(){
+    var u = document.getElementById("loginUser").value.trim();
+    var p = document.getElementById("loginPass").value;
+    if(u === ADMIN_USER && p === ADMIN_PASS){
+      isAdmin = true;
+      sessionStorage.setItem("kelechi_admin","1");
+      loginOverlay.classList.remove("open");
+      openAdmin();
+    } else {
+      loginError.classList.add("show");
+    }
+  });
+  document.getElementById("logoutBtn").addEventListener("click", function(){
+    isAdmin = false;
+    sessionStorage.removeItem("kelechi_admin");
+    adminOverlay.classList.remove("open");
+    renderProjects();
+    renderCerts();
+  });
+
+  /* Switches which admin tab pane is visible (Profile / Projects /
+     Certificates / Appearance / Messages). */
+  document.querySelectorAll(".admin-tab").forEach(function(tab){
+    tab.addEventListener("click", function(){
+      document.querySelectorAll(".admin-tab").forEach(function(t){ t.classList.remove("active"); });
+      document.querySelectorAll(".admin-pane").forEach(function(p){ p.classList.remove("active"); });
+      tab.classList.add("active");
+      document.querySelector('.admin-pane[data-pane="'+tab.getAttribute("data-tab")+'"]').classList.add("active");
+    });
+  });
+
+    /* "Add project" button in the admin panel: validates the form, then
+     adds the new project to the top of the list and re-renders Work. */
+  document.getElementById("projectSubmit").addEventListener("click", function(){
+    var title = document.getElementById("pTitle").value.trim();
+    var desc = document.getElementById("pDesc").value.trim();
+    var err = document.getElementById("projectError");
+    if(!title || !desc){ err.classList.add("show"); return; }
+    err.classList.remove("show");
+    projects.unshift({
+      title:title,
+      tag: document.getElementById("pTag").value.trim() || "Project",
+      role: document.getElementById("pRole").value.trim() || "Developer",
+      year: document.getElementById("pYear").value.trim() || String(new Date().getFullYear()),
+      desc:desc,
+      link: document.getElementById("pLink").value.trim()
+    });
+    saveProjects(projects);
+    ["pTitle","pTag","pDesc","pRole","pYear","pLink"].forEach(function(id){ document.getElementById(id).value=""; });
+    renderProjects();
+  });
+
+    /* "Add certificate" button in the admin panel: same pattern as
+     projects above. */
+  document.getElementById("certSubmit").addEventListener("click", function(){
+    var title = document.getElementById("cTitle").value.trim();
+    var err = document.getElementById("certError");
+    if(!title){ err.classList.add("show"); return; }
+    err.classList.remove("show");
+    certs.unshift({
+      title:title,
+      desc: document.getElementById("cDesc").value.trim(),
+      link: document.getElementById("cLink").value.trim(),
+      status: document.getElementById("cStatus").value
+    });
+    saveCerts(certs);
+    ["cTitle","cDesc","cLink"].forEach(function(id){ document.getElementById(id).value=""; });
+    renderCerts();
+  });
+
+  /* ---------- contact buttons ---------- */
+    /* ============================================================
+     CONTACT BUTTONS — WhatsApp link, mailto link, copy-to-clipboard
+     Replace WHATSAPP_NUMBER and EMAIL_ADDRESS with your real details.
+     ============================================================ */
+  var WHATSAPP_NUMBER = "237600000000";
+  document.getElementById("whatsappBtn").href = "https://wa.me/"+WHATSAPP_NUMBER;
+  document.getElementById("emailBtn").href = "mailto:"+EMAIL_ADDRESS;
+  document.getElementById("copyEmailBtn").addEventListener("click", function(){
+    var stateEl = document.getElementById("copyState");
+    navigator.clipboard.writeText(EMAIL_ADDRESS).then(function(){
+      stateEl.textContent = "Copied";
+      setTimeout(function(){ stateEl.textContent = "Copy"; }, 1800);
+    });
+  });
+
+  /* ---------- hamburger menu ---------- */
+    /* ============================================================
+     HAMBURGER MENU (mobile navigation)
+     Slides .mobile-menu in from the right and dims the page behind it.
+     ============================================================ */
+  var mobileMenu = document.getElementById("mobileMenu");
+  var menuOverlay = document.getElementById("menuOverlay");
+  function closeMenu(){ mobileMenu.classList.remove("open"); menuOverlay.classList.remove("open"); }
+  document.getElementById("hamburgerBtn").addEventListener("click", function(){
+    mobileMenu.classList.add("open"); menuOverlay.classList.add("open");
+  });
+  menuOverlay.addEventListener("click", closeMenu);
+  mobileMenu.querySelectorAll("a").forEach(function(a){ a.addEventListener("click", closeMenu); });
+
+  /* ---------- nav scroll spy ---------- */
+    /* ============================================================
+     SCROLL-SPY
+     Highlights the current section's link in the top nav and the
+     sidebar rail as the visitor scrolls past each section.
+     ============================================================ */
+  var navAnchors = document.querySelectorAll('.navlinks a, .rail-item');
+  var sections = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', function(){
+    var pos = window.scrollY + 120;
+    sections.forEach(function(s){
+      if(pos >= s.offsetTop && pos < s.offsetTop + s.offsetHeight){
+        document.querySelectorAll('.navlinks a').forEach(function(a){
+          a.classList.toggle('active', a.getAttribute('href')==='#'+s.id);
+        });
+        document.querySelectorAll('.rail-item').forEach(function(a){
+          a.classList.toggle('current', a.getAttribute('href')==='#'+s.id);
+        });
+      }
+    });
+  });
+
+  /* ---------- typewriter on About heading ---------- */
+    /* ============================================================
+     TYPEWRITER EFFECT (About section heading)
+     Types the heading out one character at a time the first time the
+     About section scrolls into view, then removes the blinking cursor.
+     ============================================================ */
+  var fullHeading = "Five years of shipping real work, across whatever the problem actually needs.";
+  var typewriterEl = document.getElementById("typewriterTarget");
+  var typed = false;
+  var typeObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting && !typed){
+        typed = true;
+        var i = 0;
+        var cursor = document.createElement("span");
+        cursor.className = "type-cursor";
+        function tick(){
+          typewriterEl.textContent = fullHeading.slice(0, i);
+          typewriterEl.appendChild(cursor);
+          i++;
+          if(i <= fullHeading.length){ setTimeout(tick, 22); }
+          else{ setTimeout(function(){ cursor.remove(); }, 900); }
+        }
+        tick();
+        typeObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold:0.4 });
+  typeObserver.observe(document.getElementById("about"));
+
+  /* ---------- init ---------- */
+    /* ============================================================
+     PAGE LOAD — applies every saved setting (theme, animation style,
+     profile) and does the first render of projects/certificates.
+     ============================================================ */
+  (function init(){
+    var savedTheme = localStorage.getItem("kelechi_theme_index");
+    if(savedTheme !== null) applyTheme(parseInt(savedTheme,10));
+    var savedAnim = localStorage.getItem("kelechi_anim");
+    if(savedAnim) applyAnim(savedAnim);
+    applyProfile();
+    renderProjects();
+    renderCerts();
+    observeReveals();
+  })();
+</script>
+</body>
+</html>
