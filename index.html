@@ -176,15 +176,64 @@
   .cert-manage, .journal-manage{ display:flex; justify-content:flex-end; margin-top:20px; }
 
     /* ============================================================
-     JOURNAL SECTION — static blog/write-up cards (not yet
-     admin-editable; edit the HTML directly to change these)
+     JOURNAL SECTION — blog/write-up cards, fully admin-editable.
+     Cards are rendered by renderJournal() from the `journalPosts`
+     array (localStorage). Each card's "Read more" button opens the
+     detail modal below via openPostModal().
      ============================================================ */
   .journal-grid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line);}
   .post{background:var(--ink); padding:30px; display:flex; flex-direction:column;}
   .post-date{font-family:'Space Mono',monospace; font-size:11.5px; color:var(--paper-dim); margin-bottom:14px;}
   .post h4{font-family:'Fraunces',serif; font-weight:450; font-size:20px; margin:0 0 10px;}
   .post p{font-size:13.5px; line-height:1.6; color:var(--paper-dim); margin:0 0 16px;}
-  .post a{font-size:12px; font-family:'Space Mono',monospace; color:var(--signal); margin-top:auto;}
+  .post .readmore{
+    font-size:12px; font-family:'Space Mono',monospace; color:var(--signal); margin-top:auto;
+    background:none; border:none; padding:0; text-align:left; cursor:pointer;
+  }
+
+    /* ---- Journal "read more" detail modal ----
+     Opened by openPostModal() when a post card's Read more button is
+     clicked. Read-only on the public page — nothing here is editable;
+     all editing happens in the admin Journal tab. Layout matches what
+     was asked for: company photo up top, the write-up/description
+     centered under it, then a testimonial row (person's photo next to
+     their quote) with their name under the photo. */
+  .post-modal-date{font-family:'Space Mono',monospace; font-size:11.5px; color:var(--paper-dim); margin-bottom:6px;}
+  .post-modal-title{font-family:'Fraunces',serif; font-weight:450; font-size:24px; margin:0 0 18px;}
+  .post-company-photo{
+    width:100%; max-height:220px; object-fit:cover; border-radius:8px; border:1px solid var(--line);
+    background:var(--ink-2); display:block; margin-bottom:6px;
+  }
+  .post-company-name{ text-align:center; font-family:'Space Mono',monospace; font-size:11.5px; color:var(--paper-dim); margin:0 0 20px; }
+  .post-details{ font-size:14px; line-height:1.75; color:var(--paper-dim); text-align:center; margin:0 0 26px; }
+  .testimonial-row{
+    display:flex; align-items:flex-start; gap:16px; border-top:1px solid var(--line); padding-top:22px; margin-bottom:16px;
+  }
+  .testimonial-photo-col{ flex-shrink:0; width:64px; text-align:center; }
+  .testimonial-photo{
+    width:64px; height:64px; border-radius:50%; object-fit:cover; border:1px solid var(--line-strong);
+    background:var(--ink-2); display:block; margin-bottom:8px;
+  }
+  .testimonial-photo-col .who{ font-size:11px; font-family:'Space Mono',monospace; color:var(--paper); }
+  .testimonial-quote{ font-family:'Fraunces',serif; font-style:italic; font-size:15px; line-height:1.6; color:var(--paper); margin:0; }
+  .post-contact{ font-size:12px; font-family:'Space Mono',monospace; color:var(--paper-dim); }
+  .post-modal-empty-img{
+    width:100%; height:120px; border-radius:8px; border:1px dashed var(--line-strong); background:var(--ink-2);
+    display:flex; align-items:center; justify-content:center; color:var(--paper-dim); font-size:12px;
+    font-family:'Space Mono',monospace; margin-bottom:6px;
+  }
+  .testimonial-photo-col .no-photo{
+    width:64px; height:64px; border-radius:50%; border:1px dashed var(--line-strong); background:var(--ink-2);
+    display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--paper-dim);
+    font-family:'Space Mono',monospace; margin:0 auto 8px;
+  }
+    /* Small square photo previews inside the admin Journal form, so you
+     can see the company/testimonial photo before saving the post. */
+  .mini-preview{
+    width:64px; height:64px; border-radius:8px; overflow:hidden; border:1px solid var(--line-strong);
+    margin-bottom:10px; background:var(--ink); display:flex; align-items:center; justify-content:center;
+  }
+  .mini-preview img{ width:100%; height:100%; object-fit:cover; }
 
     /* ============================================================
      ABOUT SECTION — profile photo, bio text, skills tags.
@@ -500,41 +549,18 @@
           <div class="cert-grid" id="certGrid"></div>
         </section>
 
-        <!-- JOURNAL / BLOG: currently static placeholder posts written
-             directly in this HTML — there's no admin tab for these yet
-             (see README, "Not accomplished"). Replace the text below with
-             real posts, or add a "Read post" link once posts have pages. -->
+        <!-- JOURNAL / BLOG: cards are rendered by renderPosts() into
+             #journalGrid from the `posts` array (localStorage-backed).
+             Managed entirely from the admin Journal tab — add/remove
+             never happens on this public section. Clicking "Read more"
+             opens the read-only #postOverlay modal with the full
+             write-up, company photo, and testimonial. -->
         <section class="journal" id="journal">
           <div class="work-head">
             <h2>Journal</h2>
             <p>Short write-ups on what I'm building and learning — web, Python, data, and AI.</p>
           </div>
-          <div class="journal-grid">
-            <div class="post reveal">
-              <span class="post-date">Coming soon</span>
-              <h4>What five years of freelance web work taught me about scope</h4>
-              <p>A short post on this idea — replace this text with your own write-up whenever you're ready to publish it.</p>
-              <a href="#" target="_blank" rel="noopener">Read post ↗</a>
-            </div>
-            <div class="post reveal">
-              <span class="post-date">Coming soon</span>
-              <h4>Starting the AI Engineering track on Udemy</h4>
-              <p>Notes from working through the certificate — what's clicking, what's hard, what I'd tell someone starting out.</p>
-              <a href="#" target="_blank" rel="noopener">Read post ↗</a>
-            </div>
-            <div class="post reveal">
-              <span class="post-date">Coming soon</span>
-              <h4>Moving from web development into data analysis</h4>
-              <p>How the two disciplines actually overlap, and where they don't, from someone doing both.</p>
-              <a href="#" target="_blank" rel="noopener">Read post ↗</a>
-            </div>
-            <div class="post reveal">
-              <span class="post-date">Coming soon</span>
-              <h4>Where Claude fits into my day-to-day work</h4>
-              <p>A practical look at where AI tools actually save time on client projects, and where they don't yet.</p>
-              <a href="#" target="_blank" rel="noopener">Read post ↗</a>
-            </div>
-          </div>
+          <div class="journal-grid" id="journalGrid"></div>
         </section>
 
         <!-- ABOUT: photo + bio. The photo and both bio paragraphs are
@@ -630,11 +656,11 @@
   </div>
 </div>
 
-<!-- ADMIN DASHBOARD MODAL: shown after a successful login. Five tabs
-     (Profile / Projects / Certificates / Appearance / Messages), switched
-     by the ".admin-tab" click handler in the script below. Everything
-     inside saves to this browser's localStorage — see README for what
-     that means and what a real backend would change. -->
+<!-- ADMIN DASHBOARD MODAL: shown after a successful login. Six tabs
+     (Profile / Projects / Certificates / Journal / Appearance / Messages),
+     switched by the ".admin-tab" click handler in the script below.
+     Everything inside saves to this browser's localStorage — see README
+     for what that means and what a real backend would change. -->
 <div class="modal-overlay" id="adminOverlay">
   <div class="modal wide modal-wrap">
     <button class="cta-btn modal-close" id="adminClose" type="button">Close</button>
@@ -644,6 +670,7 @@
         <button class="admin-tab active" data-tab="profile" type="button">Profile</button>
         <button class="admin-tab" data-tab="projects" type="button">Projects</button>
         <button class="admin-tab" data-tab="certs" type="button">Certificates</button>
+        <button class="admin-tab" data-tab="journal" type="button">Journal</button>
         <button class="admin-tab" data-tab="appearance" type="button">Appearance</button>
         <button class="admin-tab" data-tab="messages" type="button">Messages</button>
         <button class="cta-btn" id="logoutBtn" type="button" style="margin-top:10px;">Sign out</button>
@@ -696,6 +723,35 @@
           <div id="adminCertList"></div>
         </div>
 
+        <div class="admin-pane" data-pane="journal">
+          <h3>Add a journal write-up</h3>
+          <p class="sub">The card fields (title/date/excerpt) show on the Journal section. Everything else shows inside the "Read more" pop-up — company photo, what you actually did, and a testimonial with photo and name.</p>
+          <div class="field"><label for="jTitle">Title</label><input id="jTitle" type="text" placeholder="e.g. Rebuilding a booking site for a local retailer"></div>
+          <div class="field"><label for="jDate">Date / label</label><input id="jDate" type="text" placeholder="e.g. August 2026"></div>
+          <div class="field"><label for="jExcerpt">Short excerpt (shown on the card)</label><textarea id="jExcerpt" placeholder="One or two sentences to pull people in"></textarea></div>
+
+          <h3 style="margin-top:22px;">Company</h3>
+          <div class="mini-preview" id="jCompanyPreview"><span style="font-size:9px;color:var(--paper-dim)">No photo</span></div>
+          <div class="field"><label for="jCompanyPhoto">Company photo (logo, storefront, site screenshot, etc.)</label><input id="jCompanyPhoto" type="file" accept="image/*"></div>
+          <div class="field"><label for="jCompanyName">Company name</label><input id="jCompanyName" type="text" placeholder="e.g. Northgate Retail Ltd"></div>
+          <div class="field"><label for="jContact">Company contact (email, phone, or website)</label><input id="jContact" type="text" placeholder="e.g. hello@company.com"></div>
+
+          <h3 style="margin-top:22px;">What you actually did</h3>
+          <div class="field"><label for="jDetails">Project description</label><textarea id="jDetails" placeholder="What you built, the problem it solved, the result"></textarea></div>
+
+          <h3 style="margin-top:22px;">Testimonial</h3>
+          <div class="mini-preview" id="jTestimonialPreview"><span style="font-size:9px;color:var(--paper-dim)">No photo</span></div>
+          <div class="field"><label for="jTestimonialPhoto">Testimonial-giver's photo</label><input id="jTestimonialPhoto" type="file" accept="image/*"></div>
+          <div class="field"><label for="jTestimonialQuote">Testimonial (type up what they told you)</label><textarea id="jTestimonialQuote" placeholder="What the client or contact said about your work"></textarea></div>
+          <div class="field"><label for="jTestimonialName">Testimonial-giver's name</label><input id="jTestimonialName" type="text" placeholder="e.g. Grace Mballa, Operations Manager"></div>
+
+          <p class="error-text" id="journalError">Add at least a title and excerpt first.</p>
+          <button class="cta-btn primary" id="journalSubmit" type="button" style="background:var(--signal);border-color:var(--signal);color:var(--ink);">Add journal post</button>
+          <h3 style="margin-top:26px;">Existing journal posts</h3>
+          <p class="sub">Remove a post here — the live Journal section never shows a remove button to visitors.</p>
+          <div id="adminJournalList"></div>
+        </div>
+
         <div class="admin-pane" data-pane="appearance">
           <h3>Appearance</h3>
           <p class="sub">Pick a background/text/accent combination. Applies on this device — visitors elsewhere keep the site default until this is connected to a backend.</p>
@@ -712,6 +768,31 @@
 
       </div>
     </div>
+  </div>
+</div>
+
+<!-- JOURNAL "READ MORE" MODAL: public-facing, read-only. Populated by
+     openPostModal() with whichever post was clicked — company photo,
+     project write-up, and testimonial (photo, quote, name). Nothing in
+     here is editable; all editing happens in the admin Journal tab. -->
+<div class="modal-overlay" id="postOverlay">
+  <div class="modal wide modal-wrap">
+    <button class="cta-btn modal-close" id="postClose" type="button">Close</button>
+    <p class="post-modal-date" id="pmDate"></p>
+    <h3 class="post-modal-title" id="pmTitle"></h3>
+
+    <div id="pmCompanyPhotoWrap"></div>
+    <p class="post-company-name" id="pmCompanyName"></p>
+
+    <p class="post-details" id="pmDetails"></p>
+
+    <div class="testimonial-row">
+      <div class="testimonial-photo-col" id="pmTestimonialPhotoWrap"></div>
+      <div>
+        <p class="testimonial-quote" id="pmTestimonialQuote"></p>
+      </div>
+    </div>
+    <p class="post-contact" id="pmContact"></p>
   </div>
 </div>
 
@@ -1006,6 +1087,169 @@
     });
   }
 
+  /* ---------- journal ---------- */
+    /* ============================================================
+     JOURNAL DATA (Journal section + "Read more" detail pop-up)
+     Each post carries a card summary (title/date/excerpt) plus detail-
+     modal content: a company photo + name + contact, a project
+     description, and a testimonial (photo + quote + name). Stored in
+     localStorage under JOURNAL_KEY, same pattern as projects/certs.
+     ============================================================ */
+  var JOURNAL_KEY = "kelechi_journal_posts";
+  var defaultJournalPosts = [
+    { title:"What five years of freelance web work taught me about scope", date:"Coming soon",
+      excerpt:"A short post on this idea — replace this text with your own write-up whenever you're ready to publish it.",
+      companyPhoto:"", companyName:"", contact:"", details:"", testimonialPhoto:"", testimonialQuote:"", testimonialName:"" },
+    { title:"Starting the AI Engineering track on Udemy", date:"Coming soon",
+      excerpt:"Notes from working through the certificate — what's clicking, what's hard, what I'd tell someone starting out.",
+      companyPhoto:"", companyName:"", contact:"", details:"", testimonialPhoto:"", testimonialQuote:"", testimonialName:"" },
+    { title:"Moving from web development into data analysis", date:"Coming soon",
+      excerpt:"How the two disciplines actually overlap, and where they don't, from someone doing both.",
+      companyPhoto:"", companyName:"", contact:"", details:"", testimonialPhoto:"", testimonialQuote:"", testimonialName:"" },
+    { title:"Where Claude fits into my day-to-day work", date:"Coming soon",
+      excerpt:"A practical look at where AI tools actually save time on client projects, and where they don't yet.",
+      companyPhoto:"", companyName:"", contact:"", details:"", testimonialPhoto:"", testimonialQuote:"", testimonialName:"" }
+  ];
+  function loadJournalPosts(){
+    try{ var raw = localStorage.getItem(JOURNAL_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+    return defaultJournalPosts;
+  }
+  function saveJournalPosts(list){ localStorage.setItem(JOURNAL_KEY, JSON.stringify(list)); }
+  var journalPosts = loadJournalPosts();
+
+    /* PUBLIC-FACING render — card summary only, plus a "Read more" button
+     that opens the detail pop-up. No remove control here, ever. */
+  function renderJournal(){
+    var host = document.getElementById("journalGrid");
+    host.innerHTML = "";
+    journalPosts.forEach(function(post, i){
+      var card = document.createElement("div");
+      card.className = "post reveal";
+      card.innerHTML =
+        '<span class="post-date">'+escapeHtml(post.date)+'</span>' +
+        '<h4>'+escapeHtml(post.title)+'</h4>' +
+        '<p>'+escapeHtml(post.excerpt)+'</p>' +
+        '<button class="readmore" data-i="'+i+'" type="button">Read more ↗</button>';
+      host.appendChild(card);
+    });
+    host.querySelectorAll(".readmore").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        openPostModal(parseInt(btn.getAttribute("data-i"), 10));
+      });
+    });
+    observeReveals();
+  }
+
+    /* Fills in and opens the read-only "Read more" pop-up for one post:
+     company photo up top, the write-up centered under it, then the
+     testimonial (photo + quote, name under the photo). Falls back to a
+     dashed placeholder box wherever a photo hasn't been uploaded yet. */
+  function openPostModal(i){
+    var post = journalPosts[i];
+    if(!post) return;
+    document.getElementById("pmDate").textContent = post.date || "";
+    document.getElementById("pmTitle").textContent = post.title || "";
+    document.getElementById("pmCompanyPhotoWrap").innerHTML = post.companyPhoto
+      ? '<img class="post-company-photo" src="'+post.companyPhoto+'" alt="Company photo">'
+      : '<div class="post-modal-empty-img">No company photo added yet</div>';
+    document.getElementById("pmCompanyName").textContent = post.companyName || "";
+    document.getElementById("pmDetails").textContent = post.details || "No project description added yet.";
+    document.getElementById("pmTestimonialPhotoWrap").innerHTML =
+      (post.testimonialPhoto ? '<img class="testimonial-photo" src="'+post.testimonialPhoto+'" alt="Testimonial photo">' : '<div class="no-photo">No photo</div>') +
+      '<span class="who">'+escapeHtml(post.testimonialName || "")+'</span>';
+    document.getElementById("pmTestimonialQuote").textContent = post.testimonialQuote
+      ? ('\u201c'+post.testimonialQuote+'\u201d') : "No testimonial added yet.";
+    document.getElementById("pmContact").textContent = post.contact ? ("Contact: "+post.contact) : "";
+    postOverlay.classList.add("open");
+  }
+
+    /* ADMIN-ONLY journal list, with remove buttons. Rendered inside the
+     admin dashboard's Journal tab, never on the public page. */
+  function renderAdminJournalList(){
+    var host = document.getElementById("adminJournalList");
+    if(!host) return;
+    host.innerHTML = "";
+    if(!journalPosts.length){ host.innerHTML = '<p class="sub">No journal posts yet.</p>'; return; }
+    journalPosts.forEach(function(post, i){
+      var row = document.createElement("div");
+      row.className = "admin-row";
+      row.innerHTML =
+        '<div class="info"><b>'+escapeHtml(post.title)+'</b>'+escapeHtml(post.date)+'</div>' +
+        '<button class="remove-btn" data-i="'+i+'" title="Remove post" type="button">x</button>';
+      host.appendChild(row);
+    });
+    host.querySelectorAll(".remove-btn").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var i = parseInt(btn.getAttribute("data-i"), 10);
+        journalPosts.splice(i,1);
+        saveJournalPosts(journalPosts);
+        renderJournal();
+        renderAdminJournalList();
+      });
+    });
+  }
+
+    /* Temporary holders for the two journal photo uploads — filled in by
+     the file-input change handlers below, read into the new post object
+     when "Add journal post" is clicked, then cleared. */
+  var journalCompanyPhotoData = "";
+  var journalTestimonialPhotoData = "";
+  document.getElementById("jCompanyPhoto").addEventListener("change", function(e){
+    var file = e.target.files[0]; if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      journalCompanyPhotoData = ev.target.result;
+      document.getElementById("jCompanyPreview").innerHTML = '<img src="'+journalCompanyPhotoData+'" alt="">';
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById("jTestimonialPhoto").addEventListener("change", function(e){
+    var file = e.target.files[0]; if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      journalTestimonialPhotoData = ev.target.result;
+      document.getElementById("jTestimonialPreview").innerHTML = '<img src="'+journalTestimonialPhotoData+'" alt="">';
+    };
+    reader.readAsDataURL(file);
+  });
+
+    /* "Add journal post" button: validates the title/excerpt, bundles in
+     whichever photos were uploaded, saves, and resets the form. */
+  document.getElementById("journalSubmit").addEventListener("click", function(){
+    var title = document.getElementById("jTitle").value.trim();
+    var excerpt = document.getElementById("jExcerpt").value.trim();
+    var err = document.getElementById("journalError");
+    if(!title || !excerpt){ err.classList.add("show"); return; }
+    err.classList.remove("show");
+    journalPosts.unshift({
+      title:title,
+      date: document.getElementById("jDate").value.trim() || new Date().toLocaleDateString(),
+      excerpt:excerpt,
+      companyPhoto: journalCompanyPhotoData,
+      companyName: document.getElementById("jCompanyName").value.trim(),
+      contact: document.getElementById("jContact").value.trim(),
+      details: document.getElementById("jDetails").value.trim(),
+      testimonialPhoto: journalTestimonialPhotoData,
+      testimonialQuote: document.getElementById("jTestimonialQuote").value.trim(),
+      testimonialName: document.getElementById("jTestimonialName").value.trim()
+    });
+    saveJournalPosts(journalPosts);
+    ["jTitle","jDate","jExcerpt","jCompanyName","jContact","jDetails","jTestimonialQuote","jTestimonialName"]
+      .forEach(function(id){ document.getElementById(id).value=""; });
+    document.getElementById("jCompanyPhoto").value = "";
+    document.getElementById("jTestimonialPhoto").value = "";
+    journalCompanyPhotoData = "";
+    journalTestimonialPhotoData = "";
+    document.getElementById("jCompanyPreview").innerHTML = '<span style="font-size:9px;color:var(--paper-dim)">No photo</span>';
+    document.getElementById("jTestimonialPreview").innerHTML = '<span style="font-size:9px;color:var(--paper-dim)">No photo</span>';
+    renderJournal();
+    renderAdminJournalList();
+  });
+
+  var postOverlay = document.getElementById("postOverlay");
+  document.getElementById("postClose").addEventListener("click", function(){ postOverlay.classList.remove("open"); });
+  postOverlay.addEventListener("click", function(e){ if(e.target===postOverlay) postOverlay.classList.remove("open"); });
+
   /* ---------- profile (photo + bio) ---------- */
     /* ============================================================
      PROFILE DATA — photo, fallback initials, and bio paragraphs
@@ -1122,6 +1366,8 @@
     renderCerts();
     renderAdminProjectList();
     renderAdminCertList();
+    renderJournal();
+    renderAdminJournalList();
     applyProfile();
     renderSwatches();
     renderAnimOptions();
@@ -1297,6 +1543,7 @@
     applyProfile();
     renderProjects();
     renderCerts();
+    renderJournal();
     observeReveals();
   })();
 </script>
