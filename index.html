@@ -633,23 +633,24 @@
   </div>
 </div>
 
-<!-- ADMIN LOGIN MODAL: username/password form. Checked client-side only
-     against ADMIN_USER / ADMIN_PASS in the script below — see README for
-     why this is a convenience lock, not real security. -->
+<!-- ADMIN LOGIN MODAL: real login now — checked against Firebase
+     Authentication (see the "Firebase setup" block at the top of the
+     script), not a hardcoded value in the page. Use the email/password
+     you created in the Firebase console's Authentication > Users tab. -->
 <div class="modal-overlay" id="loginOverlay">
   <div class="modal modal-wrap">
     <button class="cta-btn modal-close" id="loginClose" type="button">Close</button>
     <h3>Admin login</h3>
     <p class="sub">Sign in to manage your site.</p>
     <div class="field">
-      <label for="loginUser">Username</label>
-      <input id="loginUser" type="text" autocomplete="username">
+      <label for="loginUser">Email</label>
+      <input id="loginUser" type="email" autocomplete="username">
     </div>
     <div class="field">
       <label for="loginPass">Password</label>
       <input id="loginPass" type="password" autocomplete="current-password">
     </div>
-    <p class="error-text" id="loginError">That username or password isn't right. Try again.</p>
+    <p class="error-text" id="loginError">That email or password isn't right. Try again.</p>
     <div class="modal-actions">
       <button class="cta-btn primary" id="loginSubmit" type="button" style="background:var(--signal);border-color:var(--signal);color:var(--ink);">Sign in</button>
     </div>
@@ -664,7 +665,7 @@
 <div class="modal-overlay" id="adminOverlay">
   <div class="modal wide modal-wrap">
     <button class="cta-btn modal-close" id="adminClose" type="button">Close</button>
-    <span class="admin-tag">Signed in as admin — changes save to this browser</span>
+    <span class="admin-tag">Signed in as admin. Messages now sync everywhere via Firebase — Profile, Projects, Certificates, Journal, and Appearance are still being connected and save to this browser only for now.</span>
     <div class="admin-layout">
       <div class="admin-tabs">
         <button class="admin-tab active" data-tab="profile" type="button">Profile</button>
@@ -762,7 +763,7 @@
 
         <div class="admin-pane" data-pane="messages">
           <h3>Messages</h3>
-          <p class="sub">Only shows messages sent from this same browser — a real shared inbox needs a backend.</p>
+          <p class="sub">This is now a real shared inbox (Firebase) — every message shows up here, from any device, once you're signed in.</p>
           <div id="msgList"></div>
         </div>
 
@@ -796,17 +797,53 @@
   </div>
 </div>
 
-<script>
+<script type="module">
     /* ============================================================
-     ADMIN CREDENTIALS + LOGIN STATE
-     WARNING: this check runs entirely in the browser, so anyone who
-     views this page's source can read these values. It stops casual
-     visitors from editing the site, but it is NOT real security —
-     see the README for how to do this properly with a backend.
+     FIREBASE SETUP
+     Real backend, replacing the old browser-only localStorage setup.
+     Auth = your real admin login. Firestore = the shared database
+     (projects, certificates, journal posts, profile, messages) that
+     every visitor sees the same version of. Storage = uploaded photos.
+     The apiKey below is meant to be public — it's not a secret. The
+     actual protection is the security rules set up in the Firebase
+     console (see firebase-setup.txt), which only let a signed-in
+     admin write data, no matter who has this key.
      ============================================================ */
-  var ADMIN_USER = "MrArk-X";
-  var ADMIN_PASS = "MrArk-X.com";
-  var isAdmin = sessionStorage.getItem("kelechi_admin") === "1";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+  import {
+    getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBrC4QBnENNEgE6MS_vWPbyvEwQ-rMf-BY",
+    authDomain: "mrark-x-portfolio.firebaseapp.com",
+    projectId: "mrark-x-portfolio",
+    storageBucket: "mrark-x-portfolio.firebasestorage.app",
+    messagingSenderId: "1072926437017",
+    appId: "1:1072926437017:web:bc7316392eb06912cc1208"
+  };
+  var firebaseApp = initializeApp(firebaseConfig);
+  var auth = getAuth(firebaseApp);
+  var db = getFirestore(firebaseApp);
+
+    /* ============================================================
+     ADMIN LOGIN STATE
+     isAdmin now reflects a REAL signed-in Firebase user, not a
+     hardcoded value. onAuthStateChanged fires once immediately with
+     whatever the current login state is (including "still signed in
+     from last visit", since Firebase remembers that on its own), and
+     again every time you sign in or out.
+     ============================================================ */
+  var isAdmin = false;
+  onAuthStateChanged(auth, function(user){
+    isAdmin = !!user;
+    renderProjects();
+    renderCerts();
+    if(typeof renderJournal === "function") renderJournal();
+  });
 
     /* Turns user-entered text (project titles, bios, messages, etc.) into
      safe HTML so nothing typed into a form can break the page or run
@@ -1305,36 +1342,45 @@
     /* ============================================================
      QUICK-MESSAGE INBOX
      Messages submitted through the Contact form are saved here so
-     they show up in the admin panel's Messages tab. This only
-     captures messages sent from THIS browser — see the README for
-     why a real shared inbox needs a backend.
+     they show up in the admin panel's Messages tab — this is now a
+     REAL shared inbox: every message lands in Firestore, so it shows
+     up for you no matter which device or browser you check from.
      ============================================================ */
-  var MSG_KEY = "kelechi_messages";
-  function loadMessages(){
-    try{ var raw = localStorage.getItem(MSG_KEY); if(raw) return JSON.parse(raw); }catch(e){}
-    return [];
-  }
-  function saveMessages(list){ localStorage.setItem(MSG_KEY, JSON.stringify(list)); }
   function renderMessages(){
     var host = document.getElementById("msgList");
-    var msgs = loadMessages();
-    if(!msgs.length){ host.innerHTML = '<p class="sub">No messages yet.</p>'; return; }
-    host.innerHTML = "";
-    msgs.slice().reverse().forEach(function(m){
-      var el = document.createElement("div");
-      el.className = "msg-item";
-      el.innerHTML =
-        '<div class="who">'+escapeHtml(m.name)+' &middot; <span class="when">'+escapeHtml(m.when)+'</span></div>' +
-        '<p>'+escapeHtml(m.message)+'</p>' +
-        '<a href="mailto:'+escapeHtml(m.from)+'">Reply by email ↗</a>';
-      host.appendChild(el);
+    if(!isAdmin){ host.innerHTML = '<p class="sub">Sign in to view messages.</p>'; return; }
+    host.innerHTML = '<p class="sub">Loading messages…</p>';
+    var q = query(collection(db, "messages"), orderBy("created_at", "desc"));
+    getDocs(q).then(function(snap){
+      if(snap.empty){ host.innerHTML = '<p class="sub">No messages yet.</p>'; return; }
+      host.innerHTML = "";
+      snap.forEach(function(docSnap){
+        var m = docSnap.data();
+        var when = m.created_at && m.created_at.toDate ? m.created_at.toDate().toLocaleString() : "";
+        var el = document.createElement("div");
+        el.className = "msg-item";
+        el.innerHTML =
+          '<div class="who">'+escapeHtml(m.name)+' &middot; <span class="when">'+escapeHtml(when)+'</span></div>' +
+          '<p>'+escapeHtml(m.message)+'</p>' +
+          '<a href="mailto:'+escapeHtml(m.email)+'">Reply by email ↗</a> ' +
+          '<button class="remove-btn" data-id="'+docSnap.id+'" title="Delete message" type="button" style="margin-left:10px;">x</button>';
+        host.appendChild(el);
+      });
+      host.querySelectorAll(".remove-btn").forEach(function(btn){
+        btn.addEventListener("click", function(){
+          deleteDoc(doc(db, "messages", btn.getAttribute("data-id"))).then(renderMessages);
+        });
+      });
+    }).catch(function(err){
+      host.innerHTML = '<p class="sub">Couldn\'t load messages: '+escapeHtml(err.message)+'</p>';
     });
   }
 
   var EMAIL_ADDRESS = "anyimkelechi09@gmail.com";
-    /* Validates the quick-message form, saves a copy locally, then opens
-     the visitor's email app with the message pre-filled as the actual
-     delivery method (this is not live chat). */
+    /* Validates the quick-message form, saves the message to Firestore
+     (this is the real inbox now, visible from any device once signed
+     in as admin), then opens the visitor's email app with the message
+     pre-filled too — a fast, guaranteed way to reach you either way. */
   document.getElementById("msgSend").addEventListener("click", function(){
     var name = document.getElementById("mName").value.trim();
     var from = document.getElementById("mFrom").value.trim();
@@ -1342,9 +1388,9 @@
     var err = document.getElementById("msgError");
     if(!name || !from || !message){ err.classList.add("show"); return; }
     err.classList.remove("show");
-    var msgs = loadMessages();
-    msgs.push({ name:name, from:from, message:message, when:new Date().toLocaleString() });
-    saveMessages(msgs);
+    addDoc(collection(db, "messages"), {
+      name:name, email:from, message:message, created_at: serverTimestamp()
+    }).catch(function(e){ console.error("Message save failed:", e.message); });
     var subject = encodeURIComponent("Message from "+name+" via portfolio site");
     var body = encodeURIComponent(message + "\n\nFrom: " + name + " (" + from + ")");
     window.location.href = "mailto:"+EMAIL_ADDRESS+"?subject="+subject+"&body="+body;
@@ -1389,24 +1435,28 @@
   loginOverlay.addEventListener("click", function(e){ if(e.target===loginOverlay) loginOverlay.classList.remove("open"); });
   adminOverlay.addEventListener("click", function(e){ if(e.target===adminOverlay){ adminOverlay.classList.remove("open"); renderProjects(); renderCerts(); } });
 
+    /* "Sign in" button: a real Firebase Auth check now — email and
+     password are sent to Firebase and verified there, not compared to
+     anything sitting in this file. onAuthStateChanged above will flip
+     isAdmin to true once this succeeds, so we just react to errors here. */
   document.getElementById("loginSubmit").addEventListener("click", function(){
-    var u = document.getElementById("loginUser").value.trim();
-    var p = document.getElementById("loginPass").value;
-    if(u === ADMIN_USER && p === ADMIN_PASS){
-      isAdmin = true;
-      sessionStorage.setItem("kelechi_admin","1");
+    var email = document.getElementById("loginUser").value.trim();
+    var pass = document.getElementById("loginPass").value;
+    loginError.classList.remove("show");
+    signInWithEmailAndPassword(auth, email, pass).then(function(){
       loginOverlay.classList.remove("open");
       openAdmin();
-    } else {
+    }).catch(function(err){
+      loginError.textContent = "That email or password isn't right. Try again.";
       loginError.classList.add("show");
-    }
+    });
   });
   document.getElementById("logoutBtn").addEventListener("click", function(){
-    isAdmin = false;
-    sessionStorage.removeItem("kelechi_admin");
-    adminOverlay.classList.remove("open");
-    renderProjects();
-    renderCerts();
+    signOut(auth).then(function(){
+      adminOverlay.classList.remove("open");
+      renderProjects();
+      renderCerts();
+    });
   });
 
   /* Switches which admin tab pane is visible (Profile / Projects /
